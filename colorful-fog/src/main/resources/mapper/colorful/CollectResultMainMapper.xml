@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.colorfulfog.mapper.CollectResultMainMapper">
+  <resultMap id="BaseResultMap" type="com.ruoyi.colorfulfog.model.CollectResultMain">
+    <!--@mbg.generated-->
+    <!--@Table cwu_collect_result_main-->
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="bill_code" jdbcType="VARCHAR" property="billCode" />
+    <result column="status" jdbcType="VARCHAR" property="status" />
+    <result column="scheme_code" jdbcType="VARCHAR" property="schemeCode" />
+    <result column="cost_term" jdbcType="VARCHAR" property="costTerm" />
+    <result column="bill_type" jdbcType="VARCHAR" property="billType" />
+    <result column="belong_user_id" jdbcType="INTEGER" property="belongUserId" />
+    <result column="belong_archive_code" jdbcType="VARCHAR" property="belongArchiveCode" />
+    <result column="belong_archive_name" jdbcType="VARCHAR" property="belongArchiveName" />
+    <result column="create_time" jdbcType="BIGINT" property="createTime" />
+    <result column="update_time" jdbcType="BIGINT" property="updateTime" />
+    <result column="update_user" jdbcType="INTEGER" property="updateUser" />
+    <result column="create_user" jdbcType="INTEGER" property="createUser" />
+    <result column="is_delete" jdbcType="INTEGER" property="isDelete" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, bill_code, `status`, scheme_code, cost_term, bill_type, belong_user_id, belong_archive_code, 
+    belong_archive_name, create_time, update_time, update_user, create_user, is_delete
+  </sql>
+</mapper>

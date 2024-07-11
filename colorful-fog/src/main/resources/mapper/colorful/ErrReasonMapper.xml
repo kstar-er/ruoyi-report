@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.colorfulfog.mapper.ErrReasonMapper">
+  <resultMap id="BaseResultMap" type="com.ruoyi.colorfulfog.model.ErrReason">
+    <!--@mbg.generated-->
+    <!--@Table cwu_err_reason-->
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="depend_code" jdbcType="VARCHAR" property="dependCode" />
+    <result column="key" jdbcType="VARCHAR" property="key" />
+    <result column="value" jdbcType="VARCHAR" property="value" />
+    <result column="deal_flag" jdbcType="INTEGER" property="dealFlag" />
+    <result column="reason" jdbcType="VARCHAR" property="reason" />
+    <result column="create_time" jdbcType="BIGINT" property="createTime" />
+    <result column="update_time" jdbcType="BIGINT" property="updateTime" />
+    <result column="update_user" jdbcType="INTEGER" property="updateUser" />
+    <result column="create_user" jdbcType="INTEGER" property="createUser" />
+    <result column="create_org" jdbcType="INTEGER" property="createOrg" />
+    <result column="update_org" jdbcType="INTEGER" property="updateOrg" />
+    <result column="is_delete" jdbcType="INTEGER" property="isDelete" />
+    <result column="version" jdbcType="INTEGER" property="version" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, depend_code, `key`, `value`, deal_flag, reason, create_time, update_time, update_user, 
+    create_user, create_org, update_org, is_delete, version
+  </sql>
+</mapper>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.colorfulfog.mapper.SchemeDetailMapper">
+  <resultMap id="BaseResultMap" type="com.ruoyi.colorfulfog.model.SchemeDetail">
+    <!--@mbg.generated-->
+    <!--@Table cwu_scheme_detail-->
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="scheme_code" jdbcType="VARCHAR" property="schemeCode" />
+    <result column="type" jdbcType="VARCHAR" property="type" />
+    <result column="fixed_coefficient" jdbcType="VARCHAR" property="fixedCoefficient" />
+    <result column="depend_code" jdbcType="VARCHAR" property="dependCode" />
+    <result column="order_name" jdbcType="VARCHAR" property="orderName" />
+    <result column="order_field" jdbcType="VARCHAR" property="orderField" />
+    <result column="order_table" jdbcType="VARCHAR" property="orderTable" />
+    <result column="result_code" jdbcType="VARCHAR" property="resultCode" />
+    <result column="result_name" jdbcType="VARCHAR" property="resultName" />
+    <result column="result_type" jdbcType="VARCHAR" property="resultType" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, scheme_code, `type`, fixed_coefficient, depend_code, order_name, order_field, 
+    order_table, result_code, result_name, result_type
+  </sql>
+</mapper>

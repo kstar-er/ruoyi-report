@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.colorfulfog.mapper.DependDataMapper">
+  <resultMap id="BaseResultMap" type="com.ruoyi.colorfulfog.model.DependData">
+    <!--@mbg.generated-->
+    <!--@Table cwu_depend_data-->
+    <result column="depend_code" jdbcType="VARCHAR" property="dependCode" />
+    <result column="range_start" jdbcType="VARCHAR" property="rangeStart" />
+    <result column="range_end" jdbcType="VARCHAR" property="rangeEnd" />
+    <result column="key" jdbcType="VARCHAR" property="key" />
+    <result column="value" jdbcType="VARCHAR" property="value" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    depend_code, range_start, range_end, `key`, `value`
+  </sql>
+</mapper>

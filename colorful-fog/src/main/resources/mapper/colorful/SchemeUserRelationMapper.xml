@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.colorfulfog.mapper.SchemeUserRelationMapper">
+  <resultMap id="BaseResultMap" type="com.ruoyi.colorfulfog.model.SchemeUserRelation">
+    <!--@mbg.generated-->
+    <!--@Table cwu_scheme_user_relation-->
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="scheme_code" jdbcType="VARCHAR" property="schemeCode" />
+    <result column="archive_user_code" jdbcType="VARCHAR" property="archiveUserCode" />
+    <result column="archive_user_name" jdbcType="VARCHAR" property="archiveUserName" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, scheme_code, archive_user_code, archive_user_name
+  </sql>
+</mapper>

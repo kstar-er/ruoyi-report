@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.colorfulfog.mapper.SchemeMainMapper">
+  <resultMap id="BaseResultMap" type="com.ruoyi.colorfulfog.model.SchemeMain">
+    <!--@mbg.generated-->
+    <!--@Table cwu_scheme_main-->
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="scheme_code" jdbcType="VARCHAR" property="schemeCode" />
+    <result column="granularity" jdbcType="VARCHAR" property="granularity" />
+    <result column="bill_type" jdbcType="VARCHAR" property="billType" />
+    <result column="belong_rel_table_name" jdbcType="VARCHAR" property="belongRelTableName" />
+    <result column="belong_rel_table_field" jdbcType="VARCHAR" property="belongRelTableField" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    `name`, scheme_code, granularity, bill_type, belong_rel_table_name, belong_rel_table_field
+  </sql>
+</mapper>

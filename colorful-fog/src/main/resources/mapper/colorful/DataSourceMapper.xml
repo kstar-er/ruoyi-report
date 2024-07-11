@@ -1,0 +1,30 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.colorfulfog.mapper.DataSourceMapper">
+
+    <resultMap type="com.ruoyi.colorfulfog.modules.datasource.dao.entity.DataSource" id="DataSourceMap">
+        <!--jdbcType="{column.columnType}"-->
+        <result property="id" column="id"  />
+        <result property="sourceCode" column="source_code"  />
+        <result property="sourceName" column="source_name"  />
+        <result property="sourceDesc" column="source_desc"  />
+        <result property="sourceType" column="source_type"  />
+        <result property="sourceConfig" column="source_config"  />
+        <result property="enableFlag" column="enable_flag"  />
+        <result property="isDelete" column="is_delete"  />
+        <result property="createUser" column="create_user"  />
+        <result property="createTime" column="create_time"  />
+        <result property="updateUser" column="update_user"  />
+        <result property="updateTime" column="update_time"  />
+
+
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,source_code,source_name,source_desc,source_type,source_config,enable_flag,delete_flag,create_by,create_time,update_by,update_time,version
+    </sql>
+
+    <!--自定义sql -->
+    <select id="selectAll" resultMap="DataSourceMap">
+        select * from cwu_data_source where is_delete = 0 and enable_flag = 1
+    </select>
+</mapper>

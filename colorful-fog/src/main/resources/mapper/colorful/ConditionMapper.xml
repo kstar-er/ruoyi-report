@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.colorfulfog.mapper.ConditionMapper">
+  <resultMap id="BaseResultMap" type="com.ruoyi.colorfulfog.model.Condition">
+    <!--@mbg.generated-->
+    <!--@Table cwu_condition-->
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="table_name" jdbcType="VARCHAR" property="tableName" />
+    <result column="condition_field" jdbcType="VARCHAR" property="conditionField" />
+    <result column="scheme" jdbcType="VARCHAR" property="schemeCode" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, `table_name`, condition_field, depend_code
+  </sql>
+
+</mapper>

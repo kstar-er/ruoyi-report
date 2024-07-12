@@ -30,7 +30,19 @@ public enum SchemeDetailParamEnum {
      * sum类型的计算方式：1、建立临时的map<key,value>,key的值是对应schemeDetail的code+groupBy的值,
      * 在第一行遇到的时候，对所有数据进行遍历，并按照对应的
      */
-    SUM("根据某值汇总同类项")
+    SUM("根据某值汇总同类项"),
+    /**
+     * 与SUM的计算方式相同，
+     * 区别在于SUM是针对某列的值进行汇总，而COUNT是针对某列的值进行计数
+     */
+    COUNT("计数"),
+
+    /**
+     * 与上面的两个计算方式相同。
+     * 区别在于，MAX和MIN是针对某列的值进行比较，并返回最大值和最小值
+     */
+    MAX("取最大值"),
+    MIN("取最小值"),
     ;
 
     private String msg;

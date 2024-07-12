@@ -7,6 +7,8 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import org.apache.ibatis.type.JdbcType;
 
+import javax.validation.constraints.NotBlank;
+
 /**
  * 代码生成业务字段表 gen_table_column
  *

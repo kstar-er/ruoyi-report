@@ -1,8 +1,11 @@
 package com.ruoyi.colorfulfog.model;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.ruoyi.colorfulfog.constant.enums.CollectObjectEnum;
+import com.ruoyi.common.core.domain.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -19,7 +22,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @TableName(value = "cwu_collect_scheme_main")
-public class CollectSchemeMain extends BaseClass{
+public class CollectSchemeMain extends BaseClass {
     /**
      * 汇总计划的名称
      */
@@ -75,6 +78,13 @@ public class CollectSchemeMain extends BaseClass{
      */
     @TableField(value = "belong_archive_name")
     private String belongArchiveName;
+
+    @TableField(value = "belong_code_field")
+    private String belongCodeField;
+
+
+    @TableField(value = "belong_name_field")
+    private String belongNameField;
 
     @TableField(value = "bill_type")
     @ApiModelProperty(value = "账单类型，应收or应付")

@@ -2,9 +2,10 @@ package com.ruoyi.colorfulfog.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.ruoyi.colorfulfog.modules.datasource.dao.entity.DataSource;
-import com.ruoyi.common.annotation.DataColumn;
-import com.ruoyi.common.annotation.DataPermission;
+import com.ruoyi.mybatis.annotation.DataColumn;
+import com.ruoyi.mybatis.annotation.DataPermission;
 import org.apache.ibatis.annotations.Mapper;
+
 
 import java.util.List;
 
@@ -16,9 +17,7 @@ import java.util.List;
 @Mapper
 public interface DataSourceMapper extends BaseMapper<DataSource> {
 
-    @DataPermission({
-            @DataColumn(key = "userName",value = "create_user")
-    })
+
     List<DataSource> selectAll();
 
 }

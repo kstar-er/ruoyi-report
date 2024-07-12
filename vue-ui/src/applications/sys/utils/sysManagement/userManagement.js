@@ -8,8 +8,7 @@ class DataSource extends PublicDataSource {
     deleteUri = '/',
     selectOneUri = '/',
     pageSize = 20,
-    tableHeader,
-    listMethod = 'post' // 数据请求的方法 post 或 get
+    tableHeader
   } = {}){
     super({
       modules,
@@ -17,8 +16,7 @@ class DataSource extends PublicDataSource {
       deleteUri,
       selectOneUri,
       pageSize,
-      tableHeader,
-      listMethod
+      tableHeader
     })
   }
 
@@ -51,7 +49,7 @@ class DataSource extends PublicDataSource {
   }
 
   async getRole(){
-    const { data: { code, data, msg } } = await pbRequest.post('/system/role/ListCreatableRole', {})
+    const { data: { code, data, msg } } = await pbRequest.post('/system/role/list', {})
     return code === 200 ? { code, data } : msg
   }
 

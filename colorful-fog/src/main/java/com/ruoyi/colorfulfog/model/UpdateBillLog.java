@@ -1,8 +1,11 @@
 package com.ruoyi.colorfulfog.model;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.ruoyi.colorfulfog.constant.enums.CollectObjectEnum;
+import com.ruoyi.common.core.domain.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -19,7 +22,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @TableName(value = "cwu_update_bill_log")
-public class UpdateBillLog extends BaseClass{
+public class UpdateBillLog extends BaseClass {
 
     /**
      * 原值

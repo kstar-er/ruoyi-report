@@ -2,17 +2,16 @@ package com.ruoyi.colorfulfog.utils;
 
 import com.ruoyi.colorfulfog.model.BillResult;
 import com.ruoyi.colorfulfog.model.vo.CalculateValueVO;
+
 import org.nfunk.jep.JEP;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class JEPUtils {
 
-    public static CalculateValueVO calculate(String exp, Map<String,BillResult> billResultMap) {
+    public static CalculateValueVO calculate(String exp, Map<String,Object> billResultMap) {
         // 将exp字符串中，截取以RS开头+后3位作为变量值
         JEP jep = new JEP();
         List<String> varList = getVariables(exp);
@@ -24,17 +23,20 @@ public class JEPUtils {
 
             // 抓取 Double.parseDouble转换错误，输入的值无法转化为数字
             for (String s : varList) {
-                if (billResultMap.get(s).getStatus().equals(0)){
+                if (billResultMap.get(s) == null){
+                   billResultMap.put(s, "0");
+                }
+                if (billResultMap.get(s).toString().contains("计算失败")){
                     return CalculateValueVO.builder()
                             .value("["+s+"]计算失败，无法进行后续计算")
                             .calculateStatusEnum(BillResult.CalculateStatusEnum.FAIL)
                             .build();
                 }
                 try {
-                    jep.addVariable(s, Double.parseDouble(billResultMap.get(s).getValue()));
+                    jep.addVariable(s, Double.parseDouble(billResultMap.get(s).toString()));
                 }catch (Exception e){
                     return CalculateValueVO.builder()
-                            .value("["+billResultMap.get(s).getValue()+"]无法转换为公式")
+                            .value("["+billResultMap.get(s).toString()+"]无法转换为公式")
                             .calculateStatusEnum(BillResult.CalculateStatusEnum.FAIL)
                             .build();
                 }
@@ -51,8 +53,12 @@ public class JEPUtils {
     }
 
     public static List<String> getVariables(String str) {
+
         List<String> variables = new ArrayList<>();
         Pattern pattern = Pattern.compile("\\$\\{([^}]+)}");
+
+        if (str == null || str.length() <= 0) return variables;
+        // 匹配变量
         Matcher matcher = pattern.matcher(str);
         while (matcher.find()) {
             variables.add(matcher.group(1));

@@ -58,19 +58,15 @@ defineExpose({
   changeCollapse
 })
 
-const collapseColor = ref('#126f9e')
-
 onBeforeMount(() => {
   routerInfo.value = _state.data.routerInfo
   menuRender()
 
   window.$eventBus.$on('changeTheLight', (val) => {
     if (!val) {
-      bgColor.value = '#011f3c'
+      bgColor.value = '#126f9e'
       textColor.value = '#fff'
-      collapseColor.value = '#5f53ce'
     } else {
-      collapseColor.value = '#126f9e'
       bgColor.value = '#fff'
       textColor.value = '#000'
     }
@@ -235,8 +231,8 @@ const jumpHref = ({ url }) => {
   position: absolute;
   top: 1%;
   left: 92%;
-
-  background: v-bind(collapseColor);
+  opacity: .8;
+  background: #126f9e;
   width: 20px;
   height: 20px;
   border-radius: 50%;

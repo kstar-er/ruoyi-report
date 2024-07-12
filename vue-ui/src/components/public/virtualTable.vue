@@ -14,7 +14,7 @@
           :row-key="rowKey"
           :row-height="38"
           :header-height="38"
-          :expand-column-key="needExpand?needCheckBox?columns[1].key:columns[0].key:''"
+          :expand-column-key="needExpand?columns[0].key:''"
           :estimated-row-height="estimatedRowHeight"
           :fixed-data="needFixedCheckData?fixedData:[]"
           fixed
@@ -59,7 +59,7 @@
         :default-current-page="1"
         :layout="!needChangeSize ? 'total, prev, pager, next, jumper':'total, sizes, prev, pager, next, jumper'"
         :page-sizes="[10, 20, 30, 50, 100, 500, 1000, 5000, 10000, 100000, 1000000]"
-        :total="needPagination ? total : 1"
+        :total="needPagination ? total : tableData.length"
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
       />
@@ -301,7 +301,7 @@ const pageColor = ref('#3d84be')
 const expandedRowKeys = ref([])
 
 let tableData = ref(_props.tableData) // 渲染数据
-const height = ref(_props.showFooter ? window.screen.height - 460 - 50 : window.screen.height - 450) // 表格高度
+const height = ref(_props.showFooter ? window.screen.height - 460 - 50 : window.screen.height - 460) // 表格高度
 
 const pageSize = ref(_props.pageSize) // 页大小
 const currentPage = ref(_props.currentPage) // 页码
@@ -339,7 +339,8 @@ const initColumns = function(){
     // 定义基础属性 兼容第一版非虚拟列表
     item.canMove = false
     item.align = 'left'
-    item.fixed = item.isFixed ? TableV2FixedDir.LEFT : '',
+    item.dataType = item.dataType
+    item.fixed = item.isFixed ? TableV2FixedDir.LEFT : ''
     item.key = item.key ? item.key : item.prop
     item.dataKey = item.key
     item.title = item.title ? item.title : item.label
@@ -399,14 +400,14 @@ const initColumns = function(){
     }
     item.cellRenderer = ({ rowData, column, rowIndex }) => {
       // 格式化数据
-      let forMatValue = _props.forMatData(column.dataKey, rowData[column.dataKey], rowData)
+      let forMatValue = _props.forMatData(column.dataKey, rowData[column.dataKey], rowData, column)
 
       // 单元格渲染函数
       return defaultCellRenderer({ rowData, rowIndex, column, forMatValue })
     }
   })
-}()
-
+}
+initColumns()
 const onSort = ([dataKey, type]) => {
   tableData.value.sort((a, b) => {
     if (a[dataKey] < b[dataKey]) return type === 'up' ? -1 : 1
@@ -512,6 +513,11 @@ const initCheckColumns = function(){
 // 需要多选框
 if (_props.needCheckBox){
   initCheckColumns()
+}
+
+const handleRender = () => {
+  initCheckColumns()
+  initHandleColumns()
 }
 
 //操作列渲染函数
@@ -719,7 +725,7 @@ const handInitColumns = (needCheckBox, needHandle) => {
     }
     item.cellRenderer = ({ rowData, column, rowIndex }) => {
       // 格式化数据
-      let forMatValue = _props.forMatData(column.dataKey, rowData[column.dataKey], rowData)
+      let forMatValue = _props.forMatData(column.dataKey, rowData[column.dataKey], rowData, column)
 
       // 单元格渲染函数
       return defaultCellRenderer({ rowData, rowIndex, column, forMatValue })
@@ -775,10 +781,13 @@ const closeTree = () => {
   expandedRowKeys.value.length = 0
 }
 
+const hoverColor = ref('rgba(41, 155, 72,.5)')
+
 defineExpose({
   clearSelection, // 清除筛选项
   handInitColumns, //手动渲染列
-  closeTree // 树形数据关闭
+  closeTree, // 树形数据关闭
+  handleRender // 重新渲染表头
 })
 </script>
 
@@ -792,7 +801,7 @@ defineExpose({
 }
 .table{
   padding-left: 10px !important;
-  padding-right: 10px !important;
+  padding-right: 0px !important;
   background: white;
 :deep(.el-button){
   padding-left: 0;
@@ -844,7 +853,7 @@ defineExpose({
   z-index: 2000;
 }
 :deep(.is-hovered){
-  background: #f1fbff;
+  background: v-bind(hoverColor);
 }
 :deep(.el-table-v2__left){
   .el-vl__vertical{

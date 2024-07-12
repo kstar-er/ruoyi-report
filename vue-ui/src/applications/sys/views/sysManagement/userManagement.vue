@@ -8,12 +8,16 @@
     </div>
     <div class="extend-handle">
       <div class="extend-handle-left">
-        <xButton
+        <el-button
           v-authorityHandle="'system:user:query'"
+          class="handle-btn mr12"
+          color="#4a78bd"
+          style="color: #666"
+          plain
           @click="addRow"
         >
           新增
-        </xButton>
+        </el-button>
       </div>
     </div>
     <v-table
@@ -117,14 +121,13 @@ import { ref, reactive, getCurrentInstance, onBeforeMount, h, resolveDirective, 
 import { ElButton, ElSwitch, ElImageViewer } from 'element-plus'
 import client from '@/utils/upload/upLoadClient'
 import router from '../../router'
-import xButton from '@/components/common/xButton'
-const imgViewerVisible = ref(false)
+
 const authority = resolveDirective('authority')
 const myClient = ref(client)
 const { proxy } = getCurrentInstance()
 const isShowEditTableHeader = ref(false)
 const dataSource = ref(null)
-const userInfo = JSON.parse(sessionStorage.getItem('userInfo'))
+const imgViewerVisible = ref(false)
 const initDataSource = () => {
   dataSource.value = new DataSource({
     modules: 'userManagement',
@@ -145,10 +148,10 @@ const goCompile = async ({ userId }, rowIndex) => {
   editControlCommon.formInputEl[2].disabled = true
   const ctx = await dataSource.value.getUser(userId)
   editControlCommon.formSelectEl[0].options.length = 0
-  let res = await dataSource.value.getRoleById(userInfo.user.userId)
+  let res = await dataSource.value.getRole()
   if (res.code === 200){
     editControlCommon.formSelectEl[0].options.length = 0
-    res.data.roles.forEach(item => {
+    res.data.rows.forEach(item => {
       let { roleId, roleName } = item
       editControlCommon.formSelectEl[0].options.push({
         label: roleName,
@@ -166,10 +169,10 @@ const addRow = async () => {
   editControlCommon.formInputEl[0].disabled = false
   editControlCommon.formInputEl[1].disabled = false
   editControlCommon.formInputEl[2].disabled = false
-  let res = await dataSource.value.getRoleById(userInfo.user.userId)
+  let res = await dataSource.value.getRole()
   if (res.code === 200){
     editControlCommon.formSelectEl[0].options.length = 0
-    res.data.roles.forEach(item => {
+    res.data.rows.forEach(item => {
       let { roleId, roleName } = item
       editControlCommon.formSelectEl[0].options.push({
         label: roleName,
@@ -372,7 +375,7 @@ const customizeCellRenderer = ({ forMatValue, rowIndex, column, rowData }) => {
       showCancelButton: true,
       cancelButtonText: '再想想',
       confirmButtonText: '确认',
-
+      confirmButtonClass: 'delete-confirm-btn',
       callback: (action) => {
         if (action === 'cancel') return
         else {

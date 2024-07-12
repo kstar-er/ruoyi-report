@@ -1,7 +1,11 @@
 package com.ruoyi.colorfulfog.model;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.ruoyi.colorfulfog.constant.enums.ResutlTypeEnum;
+import com.ruoyi.common.core.domain.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -18,7 +22,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @TableName(value = "cwu_collect_scheme_detail")
-public class CollectSchemeDetail extends BaseClass{
+public class CollectSchemeDetail extends BaseClass {
 
     /**
      * 汇总方案的编码
@@ -52,7 +56,7 @@ public class CollectSchemeDetail extends BaseClass{
      * 需要汇总的方案的编码
      */
     @TableField(value = "scheme_result_code")
-    @ApiModelProperty(value = "需要汇总的方案的编码")
+    @ApiModelProperty(value = "需要汇总的方案的字段的编码")
     private String schemeResultCode;
 
     /**
@@ -88,9 +92,65 @@ public class CollectSchemeDetail extends BaseClass{
     @TableField(value = "time_field_name")
     private String timeFieldName;
 
+    @TableField(value = "hide_when_push")
+    private Boolean hideWhenPush;
+    /**
+     * 表达式
+     */
+    @TableField(value = "expression")
+    private String expression;
+    /**
+     * 分组字段的编码
+     */
+    @TableField(value = "group_by_field")
+    private String groupByField;
+
+    /**
+     * 分组字段的名字
+     */
+    @TableField(value = "group_by_field_name")
+    private String groupByFieldName;
+
+    /**
+     * 分组字段的值，多个值用,号分开
+     */
+    @TableField(value = "group_by_field_value")
+    private String groupByFieldValue;
+
+    /**
+     * 计算顺序
+     */
+    @TableField(value = "calculate_order")
+    private Integer calculateOrder;
+
+    /**
+     * 显示顺序
+     */
+    @TableField(value = "display_order")
+    private Integer displayOrder;
+    /**
+     * 计算结果的类型，数字，链接，文本，日期
+     */
+    @TableField(value = "result_type")
+    private ResutlTypeEnum resultType;
+
+    @TableField(value = "`decimal`")
+    private Integer decimal;
     public enum CollectTypeEnum{
-        SUM,
-        ONE,
+        SUM("汇总"),
+        ONE("只取一行"),
+        EMPTY("空白字段"),
+        /**
+         * 根据条件判断，只有满足条件的才会汇总进来
+         */
+        CONDITION_SUM("条件汇总"),
+        EQUATION("自定义条件计算")
+
+        ;
+        String msg;
+        CollectTypeEnum(String msg){
+            this.msg = msg;
+        }
     }
 
 }

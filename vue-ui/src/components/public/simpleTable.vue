@@ -7,22 +7,21 @@
       class="table-class"
       fix
       highlight-current-row
+      style="width: 100%"
       :show-summary="needSummary"
       :span-method="objectSpanMethod"
       :summary-method="summary"
-      stripe
       :data="tableData"
       :row-key="row => row.id"
       :max-height="maxHeight"
       :row-style="rowStyle ? rowStyle:{height: '35px',borderColor:'rgba(192, 192, 192,.5)'}"
       :cell-style="{padding: '0',borderColor:'rgba(192, 192, 192,.5)'}"
-      style="width: 100%"
       :border="needBorder"
       :header-cell-style="headerCellStyle"
       :header-row-style="{ borderColor:'rgba(192, 192, 192,.5)' }"
       @cell-dblclick="cellDbClick"
       @selection-change="selectionChange"
-      @row-dblclick="rowDblclick"
+      @row-dblclick="chooseRow"
     >
       <el-table-column
         v-if="needSelection"
@@ -63,7 +62,7 @@
         </template>
       </el-table-column>
       <el-table-column
-        v-if="needEndControl&&!needSelection"
+        v-if="needEndControl"
         fixed="right"
         label="操作"
         align="center"
@@ -88,7 +87,7 @@
       :current-page="currentPage"
       background
       :small="small"
-      layout="total, sizes, prev, pager, next"
+      :layout="needChangeSize ? ' total, sizes, prev, pager, next':' total, prev, pager, next'"
       :page-sizes="[10, 20, 30, 50, 100, 200, 500, 1000]"
       :total="total"
       :page-size="pageSize"
@@ -114,15 +113,6 @@ let selectionChange = (selection) => {
   emit('selectionChange', selection)
 }
 let chooseRow = (row) => emit('chooseRow', row)
-
-const rowDblclick = (row) => {
-  if (!props.needSelection) emit('chooseRow', row)
-  else {
-    proxy.$refs.tableRef.toggleRowSelection(row, undefined)
-    console.log(row)
-  }
-
-}
 let currentChange = (page) => emit('currentChange', page)
 const handleSizeChange = (val) => emit('sizeChange', val)
 const cellDbClick = (row, column, cell, event) => emit('cellDbClick', row, column, cell, event)
@@ -141,7 +131,7 @@ const props = defineProps({
   },
   needChangeSize: {
     type: Boolean,
-    default: false
+    default: true
   },
   rowStyle: {
     type: [Boolean, Function],
@@ -194,7 +184,10 @@ const props = defineProps({
   headerCellStyle: {
     type: Object,
     default(){
-      return { background: '#126f9e', color: '#fff', borderColor: 'rgba(192, 192, 192,.5)' }
+      // return { background: 'rgb(98,98,98)', color: '#fff' }
+      return { background: '#126f9e', color: '#fff', borderColor: 'rgba(192, 192, 192,.5)', padding: '0px', height: '38px' }
+
+      // return { background: 'rgb(0, 143, 224)', color: '#fff' }
     }
   },
   needPage: {

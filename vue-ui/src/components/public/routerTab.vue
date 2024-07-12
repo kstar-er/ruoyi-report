@@ -1,7 +1,7 @@
 
 <template>
   <div class="container">
-    <el-scrollbar>
+    <el-scrollbar :height="80">
       <div class="tab-list">
         <div
           v-for="item,idx in openTab"
@@ -10,7 +10,6 @@
           :class="
             { 'active': activeIndex===idx, 'closing': item.isClosing }
           "
-
           @click="changeRoute(idx,item.path,item.query)"
         >
           <div
@@ -33,13 +32,13 @@
           </el-icon>
         </div>
         <el-tooltip
-          class="box-item "
+          class="box-item"
           effect="dark"
           content="关闭其他选项卡"
           placement="bottom"
         >
           <el-button
-            class="ml10"
+
             circle
             icon="Delete"
             type="info"

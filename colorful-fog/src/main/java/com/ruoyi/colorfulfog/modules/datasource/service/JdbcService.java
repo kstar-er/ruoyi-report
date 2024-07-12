@@ -16,7 +16,7 @@ public interface JdbcService {
      *
      * @param id
      */
-    void removeJdbcConnectionPool(Integer id);
+    void removeJdbcConnectionPool(Long id);
 
 
     /**

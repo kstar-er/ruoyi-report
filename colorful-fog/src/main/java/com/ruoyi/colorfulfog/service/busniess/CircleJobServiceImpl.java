@@ -1,5 +1,6 @@
 package com.ruoyi.colorfulfog.service.busniess;
 
+import com.ruoyi.colorfulfog.constant.enums.ExecutionTimeUnit;
 import com.ruoyi.colorfulfog.model.SchemeMain;
 import com.ruoyi.colorfulfog.service.table.interfaces.SchemeMainService;
 import com.ruoyi.colorfulfog.utils.TimeUtils;
@@ -19,33 +20,26 @@ public class CircleJobServiceImpl {
      */
     @Autowired
     SchemeMainService schemeMainService;
-//    @Scheduled(cron = "0 0 0 * * ?") //每隔一天
-//    @Scheduled(cron = "0/10 * * * * ?") //测试用,5秒
-    public void circleJob() {
-        log.info("生成一次库存账单");
-        List<String> codeList= new ArrayList<>();
-        codeList.add("SC002");
-        schemeMainService.startCreateBill(codeList,false);
-    }
+
 
     @XxlJob("checkDayScheme")
     public void checkDayScheme(){
         // 获取当前系统的小时数
         int hour = TimeUtils.getHour();
-        List<String> schemeMains =   schemeMainService.getNeedSchemeMainList(SchemeMain.ExecutionUnit.DAILY,hour);
+        List<String> schemeMains =   schemeMainService.getNeedSchemeMainList(ExecutionTimeUnit.DAILY,hour);
         if (schemeMains.isEmpty()){
             return;
         }
-        schemeMainService.startCreateBill(schemeMains,false);
+        schemeMainService.startCreateBill(schemeMains,0);
     }
     @XxlJob("checkMonScheme")
     public void checkMonScheme(){
         int day = TimeUtils.getDay();
-        List<String> schemeMains =   schemeMainService.getNeedSchemeMainList(SchemeMain.ExecutionUnit.MONTHLY,day);
+        List<String> schemeMains =   schemeMainService.getNeedSchemeMainList(ExecutionTimeUnit.MONTHLY,day);
         if (schemeMains.isEmpty()){
             return;
         }
-        schemeMainService.startCreateBill(schemeMains,false);
+        schemeMainService.startCreateBill(schemeMains,0);
         //        schemeMainService.startCreateBill(Collections.singletonList(param),false);
     }
 }

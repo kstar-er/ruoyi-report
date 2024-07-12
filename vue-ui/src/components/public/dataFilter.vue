@@ -92,7 +92,6 @@
           </xButton>
         </div>
         <xButton
-          v-if="!isPad"
           type="warning"
           class="ml10"
           @click.stop="showSenion"
@@ -217,7 +216,7 @@
 </template>
 
 <script setup>
-import { onBeforeMount, reactive, ref } from 'vue'
+import { onBeforeMount, reactive, ref, watch } from 'vue'
 
 const defaultTime = new Date(2000, 1, 1, 12, 0, 0)
 
@@ -267,7 +266,11 @@ const showSenion = function(){
 
 }
 
-const search = function(){
+const returnFilterValue = () => {
+  return search('filterValue')
+}
+
+const search = function(type){
   let filter = filterForm.filter(item => item.value && item.value.toString().length !== 0 || item.value === 0)
   filter = filter.concat(senionItems.filter(item => item.value && item.value.toString().length !== 0 || item.value === 0))
   let temp = {}
@@ -279,7 +282,8 @@ const search = function(){
     }
     else temp[item.prop] = typeof item.value === 'string' ? item.value.replace(/(^\s*)/g, "") : item.value
   })
-  _emit('search', temp)
+  if (type === 'filterValue') return temp
+  else _emit('search', temp)
 }
 
 const resetInput = function(b){
@@ -309,22 +313,12 @@ const backfill = (propObj, val) => {
   }
 }
 
-const backfillSearch = (keyList, valList) => {
-  keyList.forEach((key, index) => {
-    let idx = filterForm.findIndex(item => item.prop === key)
-    filterForm[idx].value = valList[index]
-  })
-
-}
-
-defineExpose({
-  backfill,
-  backfillSearch
-})
-onBeforeMount(() => {
+const init = () => {
+  filterForm.length = 0
+  senionItems.length = 0
   let daterangeList = []
   _props.filterItems.forEach((item) => {
-    if (item.type !== 'none'){
+    if (item.type && item.type !== 'none'){
       if ((item.dataKey === 'processStatus' || item.prop) && item.type === 'multiple'){
         filterForm.push({
           label: item.title ? item.title : item.label,
@@ -356,10 +350,10 @@ onBeforeMount(() => {
     }
   })
   filterForm.push(...daterangeList)
-
   let count = window.screen.width < 1920 ? 3 : 4
   if (_props.isPad) senionItems.push(...filterForm)
-  else senionItems.push(...filterForm.splice(count, filterForm.length))
+  else senionItems.push(...filterForm.splice(4, filterForm.length))
+
   _props.expandFilterItems.forEach(item => {
     senionItems.unshift({
       label: item.title ? item.title : item.label,
@@ -369,6 +363,14 @@ onBeforeMount(() => {
       options: item.options ? item.options : []
     })
   })
+}
+
+onBeforeMount(() => {
+  init()
+})
+
+watch(() => _props.filterItems.length, () => {
+  init()
 })
 
 const getDisabledMinutes = (data) => {
@@ -389,6 +391,11 @@ const makeRange = (start, end) => {
   }
   return result
 }
+
+defineExpose({
+  backfill,
+  returnFilterValue
+})
 </script>
 
 <style lang="less" scoped>
@@ -483,7 +490,10 @@ const makeRange = (start, end) => {
   :deep(.el-range-editor.el-input__inner){
     height: 30px;
   }
-
+  :deep(.el-select){
+    width: 200px;
+    height: 30px;
+  }
 }
 
 }
@@ -492,11 +502,6 @@ const makeRange = (start, end) => {
 }
 :deep(.el-date-editor){
   width: 280px;
-}
-
-:deep(.el-select){
-  width: 200px;
-
 }
 </style>
 

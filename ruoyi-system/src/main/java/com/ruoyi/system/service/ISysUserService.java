@@ -24,6 +24,7 @@ public interface ISysUserService {
      */
     List<SysUser> selectUserList(SysUser user);
 
+    Boolean registerUserInfo(SysUser sysUser);
     /**
      * 根据条件分页查询已分配用户角色列表
      *

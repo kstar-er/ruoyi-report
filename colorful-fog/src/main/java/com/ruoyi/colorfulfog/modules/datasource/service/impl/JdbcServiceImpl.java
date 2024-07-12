@@ -3,9 +3,13 @@ package com.ruoyi.colorfulfog.modules.datasource.service.impl;
 
 import com.ruoyi.colorfulfog.config.HikariPoolProperties;
 import com.ruoyi.colorfulfog.modules.datasource.controller.dto.DataSourceDto;
+import com.ruoyi.colorfulfog.modules.datasource.dao.entity.DataSource;
 import com.ruoyi.colorfulfog.modules.datasource.service.JdbcService;
+import com.ruoyi.colorfulfog.service.table.DataSourceServiceImpl;
+import com.ruoyi.colorfulfog.service.table.interfaces.DataSourceService;
 import com.zaxxer.hikari.pool.HikariPool;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +31,7 @@ public class JdbcServiceImpl implements JdbcService {
     /**
      * 所有数据源的连接池存在map里
      */
-    private Map<Integer, HikariPool> map = new ConcurrentHashMap<>();
+    private Map<Long, HikariPool> map = new ConcurrentHashMap<>();
     private Object lock = new Object();
 
     public HikariPool getJdbcConnectionPool(DataSourceDto dataSource) {
@@ -54,7 +58,7 @@ public class JdbcServiceImpl implements JdbcService {
      * @param id
      */
     @Override
-    public void removeJdbcConnectionPool(Integer id) {
+    public void removeJdbcConnectionPool(Long id) {
         try {
             HikariPool pool = map.get(id);
             if (pool != null) {

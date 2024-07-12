@@ -15,15 +15,15 @@
       <template #header="{ titleId, titleClass }">
         <div class="jx-dialog-header">
           <div :id="titleId" :class="titleClass">
-            <h5 class="inline-block">
+            <h4 class="inline-block">
               {{ title }}
-            </h5>
+            </h4>
             <el-input
               v-if="isShowSearchInput"
               v-model="searchVal"
               clearable
               :placeholder="searchInputPlaceholder"
-              style="width:220px;margin-left:20px"
+              style="width:220px;margin-left:20px;font-weight:normal"
             >
               <template #append>
                 <el-button icon="Search" @click="doSearch" />
@@ -31,14 +31,13 @@
             </el-input>
             <slot name="customOperation" />
           </div>
-
           <div>
-            <el-button
+            <!-- <el-button
               class="dialog-close-btn" type="primary"
               icon="RefreshLeft"
               circle
               @click="refresh"
-            />
+            /> -->
             <el-button
               v-if="!hideClose"
               class="dialog-close-btn" type="danger"
@@ -52,12 +51,12 @@
       <simpleTable
         v-if="showDialog"
         ref="simple"
-        :for-mat-data="dataSource.forMatDataV2"
+        :for-mat-data="dataSource.forMatData"
         :options-width="100"
         :loading="loading"
         :show-tips="false"
         small
-
+        need-page
         :max-height="maxHeight"
         :current-page="dataSource.currentPage"
         :table-header="dataSource.tableHeader"
@@ -69,14 +68,16 @@
         :need-selection="needSelection"
         :row-style="rowStyle"
         :header-cell-style="appendTableStyle"
-        @choose-row="chooseRow"
+        @chooseRow="chooseRow"
         @current-change="dataSource.currentPageChange($event,dataSource,proxy.$refs.simple)"
-        @size-change="dataSource.pageSizeChange($event,dataSource,proxy.$refs.simple)"
-        @selection-change="dataSource.selectionChange($event,dataSource)"
+        @sizeChange="dataSource.pageSizeChange($event,dataSource,proxy.$refs.simple)"
+        @selectionChange="dataSource.selectionChange($event,dataSource)"
       >
         <template #endOption="{row}">
           <el-button
+            v-if="!row.children"
             id="optionsBtn"
+            :disabled="useChoose"
             text
             type="primary"
             style="background:transparent"
@@ -84,18 +85,19 @@
           >
             确定
           </el-button>
+          <span v-else>
+            -
+          </span>
         </template>
       </simpleTable>
       <div v-if="needSelection" class="mt10">
         <el-button
-          size="small"
           type="primary" style="float:right;margin-right:10px"
           @click="submit"
         >
           确定
         </el-button>
         <el-button
-          size="small"
           type="danger" style="float:right;margin-right:10px"
           @click="closeDialog"
         >
@@ -129,6 +131,11 @@ const _props = defineProps({
   },
 
   fullscreen: {
+    type: Boolean,
+    default: false
+  },
+
+  useChoose: {
     type: Boolean,
     default: false
   },
@@ -175,7 +182,7 @@ const _props = defineProps({
 
   needChangeSize: {
     type: Boolean,
-    default: false
+    default: true
   },
 
   needSelection: {

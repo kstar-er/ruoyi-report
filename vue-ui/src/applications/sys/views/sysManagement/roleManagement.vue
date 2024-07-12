@@ -8,12 +8,16 @@
     </div>
     <div class="extend-handle">
       <div class="extend-handle-left">
-        <xButton
+        <el-button
           v-authorityHandle="'system:role:add'"
+          class="handle-btn mr12"
+          color="#4a78bd"
+          style="color: #666"
+          plain
           @click="addRow"
         >
           新增
-        </xButton>
+        </el-button>
       </div>
     </div>
     <v-table
@@ -255,7 +259,7 @@ const customizeCellRenderer = ({ forMatValue, rowIndex, column, rowData }) => {
       showCancelButton: true,
       cancelButtonText: '再想想',
       confirmButtonText: '确认',
-       
+      confirmButtonClass: 'delete-confirm-btn',
       callback: (action) => {
         if (action === 'cancel') return
         else {

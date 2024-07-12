@@ -2,26 +2,30 @@ package com.ruoyi.colorfulfog.service.table;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.ruoyi.colorfulfog.constant.enums.GetDataFromType;
-import com.ruoyi.colorfulfog.constant.enums.IdTypeEnum;
-import com.ruoyi.colorfulfog.constant.enums.SchemeDetailParamEnum;
-import com.ruoyi.colorfulfog.mapper.SchemeDetailMapper;
+import com.ruoyi.colorfulfog.config.exception.GlobalException;
+import com.ruoyi.colorfulfog.constant.enums.*;
 import com.ruoyi.colorfulfog.model.DependRule;
-import com.ruoyi.colorfulfog.model.SchemeDetail;
+import com.ruoyi.colorfulfog.model.dto.CopyFieldDto;
 import com.ruoyi.colorfulfog.service.busniess.interfaces.CodeService;
 import com.ruoyi.colorfulfog.service.table.interfaces.DependRuleService;
-import com.ruoyi.colorfulfog.service.table.interfaces.SchemeDetailService;
 import com.ruoyi.colorfulfog.utils.GraphUtils;
 import com.ruoyi.colorfulfog.utils.JEPUtils;
 import com.ruoyi.common.utils.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.ruoyi.colorfulfog.model.SchemeDetail;
+import com.ruoyi.colorfulfog.mapper.SchemeDetailMapper;
+import com.ruoyi.colorfulfog.service.table.interfaces.SchemeDetailService;
+
+import javax.annotation.Resource;
 
 @Service
 public class SchemeDetailServiceImpl extends ServiceImpl<SchemeDetailMapper, SchemeDetail> implements SchemeDetailService {
@@ -39,13 +43,42 @@ public class SchemeDetailServiceImpl extends ServiceImpl<SchemeDetailMapper, Sch
     }
 
     @Override
-    public List<SchemeDetail> listSchemeDetailBySchemeCode(List<String> schemeCodeList) {
-        return list(new LambdaQueryWrapper<SchemeDetail>().in(SchemeDetail::getSchemeCode, schemeCodeList));
+    public List<SchemeDetail> listSchemeDetailBySchemeCode(List<String> schemeCodeList, SelectTypeEnum selectTypeEnum) {
+        if (CollectionUtils.isEmpty(schemeCodeList)){
+            return new ArrayList<>();
+        }
+        schemeCodeList = schemeCodeList.stream().distinct().collect(Collectors.toList());;
+        if (selectTypeEnum.equals(SelectTypeEnum.CALC)){
+            return list(new LambdaQueryWrapper<SchemeDetail>()
+                    .in(SchemeDetail::getSchemeCode, schemeCodeList));
+        }else if (selectTypeEnum.equals(SelectTypeEnum.PUSH)){ // 推送的模式获得的数据不包括需要隐藏的这部分
+            return list(new LambdaQueryWrapper<SchemeDetail>()
+                    .in(SchemeDetail::getSchemeCode, schemeCodeList)
+                    .eq(SchemeDetail::getHideWhenPush, 0));
+        }else if (selectTypeEnum.equals(SelectTypeEnum.EXPORT)){
+            return list(new LambdaQueryWrapper<SchemeDetail>()
+                    .in(SchemeDetail::getSchemeCode, schemeCodeList)
+                    .eq(SchemeDetail::getHideWhenExport, 0));
+        }
+        throw new RuntimeException("未知的查询模式");
     }
 
     @Override
-    public List<SchemeDetail> listSchemeDetailBySchemeCode(String schemeCode) {
-        return list(new LambdaQueryWrapper<SchemeDetail>().eq(SchemeDetail::getSchemeCode, schemeCode));
+    public List<SchemeDetail> listSchemeDetailBySchemeCode(String schemeCode,SelectTypeEnum selectTypeEnum) {
+        if (selectTypeEnum.equals(SelectTypeEnum.CALC)){
+            return list(new LambdaQueryWrapper<SchemeDetail>()
+                    .eq(SchemeDetail::getSchemeCode, schemeCode));
+        }else if (selectTypeEnum.equals(SelectTypeEnum.PUSH)){ // 推送的模式获得的数据不包括需要隐藏的这部分
+            return list(new LambdaQueryWrapper<SchemeDetail>()
+                    .eq(SchemeDetail::getSchemeCode, schemeCode)
+                    .ne(SchemeDetail::getHideWhenPush, 1));
+        }else if (selectTypeEnum.equals(SelectTypeEnum.EXPORT)){
+            return list(new LambdaQueryWrapper<SchemeDetail>()
+                    .eq(SchemeDetail::getSchemeCode, schemeCode)
+                    .eq(SchemeDetail::getHideWhenExport, 1));
+        }else {
+            throw new RuntimeException("未知的查询模式");
+        }
 
     }
     @Override
@@ -61,7 +94,7 @@ public class SchemeDetailServiceImpl extends ServiceImpl<SchemeDetailMapper, Sch
             return;
         }
 
-        List<SchemeDetail> schemeDetailList1 = listSchemeDetailBySchemeCode(schemeDetailList.get(0).getSchemeCode());
+        List<SchemeDetail> schemeDetailList1 = listSchemeDetailBySchemeCode(schemeDetailList.get(0).getSchemeCode(),SelectTypeEnum.CALC);
         if (CollectionUtils.isNotEmpty(schemeDetailList1)){
             schemeDetailList.addAll(schemeDetailList1);
         }
@@ -73,7 +106,7 @@ public class SchemeDetailServiceImpl extends ServiceImpl<SchemeDetailMapper, Sch
 
     @Override
     public void updateSchemeDetailBatch(List<SchemeDetail> schemeDetail){
-        List<SchemeDetail> schemeDetailList1 = listSchemeDetailBySchemeCode(schemeDetail.get(0).getSchemeCode());
+        List<SchemeDetail> schemeDetailList1 = listSchemeDetailBySchemeCode(schemeDetail.get(0).getSchemeCode(),SelectTypeEnum.CALC);
         for (SchemeDetail detail : schemeDetailList1) {
             if (detail.getResultCode().equals(schemeDetail.get(0).getResultCode())){
                // 移除当前detail
@@ -112,7 +145,7 @@ public class SchemeDetailServiceImpl extends ServiceImpl<SchemeDetailMapper, Sch
                     .collect(Collectors.groupingBy(DependRule::getDependCode));
         }
         // 批量获取依赖数据
-
+        Map<String,SchemeDetail> schemeDetailMap = schemeDetailList.stream().collect(Collectors.toMap(SchemeDetail::getResultCode,s->s));
 
         // 创建邻接表节点
         Map<String,GraphUtils.Node> nodeMap = new HashMap<>();
@@ -124,9 +157,13 @@ public class SchemeDetailServiceImpl extends ServiceImpl<SchemeDetailMapper, Sch
         GraphUtils.Graph graph = new GraphUtils.Graph();
         for (SchemeDetail schemeDetail : schemeDetailList) {
             if (schemeDetail.getType().equals(SchemeDetailParamEnum.EQUATION)){
+                if (schemeDetail.getExpression()==null||!schemeDetail.getExpression().contains("$")){
+                    throw new GlobalException("公式：["+schemeDetail.getResultName()+"]中没有设置表达式，请先设置表达式后再添加","");
+                }
                 List<String> variableList = JEPUtils.getVariables(schemeDetail.getExpression());
                 for (String variable : variableList) {
                     graph.addNode(nodeMap.get(variable),nodeMap.get(schemeDetail.getResultCode()));
+                    schemeDetailMap.get(variable).setCalculatedTag(true);
                 }
             }
             if (schemeDetail.getType().equals(SchemeDetailParamEnum.DEPEND)){
@@ -139,17 +176,26 @@ public class SchemeDetailServiceImpl extends ServiceImpl<SchemeDetailMapper, Sch
                 }
                 Map<String,List<DependRule>> schemeDependRuleMap = dependRuleList1.stream()
                         .collect(Collectors.groupingBy(DependRule::getSchemeCode));
+                if (schemeDependRuleMap.get(schemeDetail.getSchemeCode())==null){
+                    throw new GlobalException("分组管理表："+schemeDetail.getDependCode()+"中没有绑定当前方案的字段，请先绑定字段后再添加");
+                }
                 // 根据方案做分组，只拿当前方案的规则
                 for (DependRule dependRule : schemeDependRuleMap.get(schemeDetail.getSchemeCode())){
                     graph.addNode(nodeMap.get(dependRule.getOrderField()),nodeMap.get(schemeDetail.getResultCode()));
+                    schemeDetailMap.get(dependRule.getOrderField()).setCalculatedTag(true);
                 }
             }
             if ((schemeDetail.getType().equals(SchemeDetailParamEnum.SINGLE_TAG)||
             schemeDetail.getType().equals(SchemeDetailParamEnum.FOR_MUL_TAG)||
-                    schemeDetail.getType().equals(SchemeDetailParamEnum.SUM))
+                    schemeDetail.getType().equals(SchemeDetailParamEnum.SUM))||
+                    schemeDetail.getType().equals(SchemeDetailParamEnum.COUNT)||
+                    schemeDetail.getType().equals(SchemeDetailParamEnum.MAX)||
+                    schemeDetail.getType().equals(SchemeDetailParamEnum.MIN)
                     &&schemeDetail.getGetDataFrom().equals(GetDataFromType.SCHEME)){
                 graph.addNode(nodeMap.get(schemeDetail.getOrderField()),nodeMap.get(schemeDetail.getResultCode()));
+                schemeDetailMap.get(schemeDetail.getOrderField()).setCalculatedTag(true);
                 graph.addNode(nodeMap.get(schemeDetail.getGroupByField()),nodeMap.get(schemeDetail.getResultCode()));
+                schemeDetailMap.get(schemeDetail.getGroupByField()).setCalculatedTag(true);
             }
         }
         GraphUtils.KahnTopo topo = new GraphUtils.KahnTopo(graph);
@@ -166,9 +212,32 @@ public class SchemeDetailServiceImpl extends ServiceImpl<SchemeDetailMapper, Sch
     public void deleteSchemeDetail(List<Integer> ids){
         List<SchemeDetail> schemeDetailList = listByIds(ids);
         removeBatchByIds(ids);
-        List<SchemeDetail> schemeDetailList1 = listSchemeDetailBySchemeCode(schemeDetailList.get(0).getSchemeCode());
+        List<SchemeDetail> schemeDetailList1 = listSchemeDetailBySchemeCode(schemeDetailList.get(0).getSchemeCode(), SelectTypeEnum.CALC);
         calculateOrder(schemeDetailList1);
         updateBatchById(schemeDetailList1);
+    }
+    @Override
+    public  void copyField(CopyFieldDto copyFieldDto){
+        List<SchemeDetail> schemeDetails = listSchemeDetailBySchemeCode(copyFieldDto.getSourceSchemeCode(),SelectTypeEnum.CALC);
+
+        schemeDetails =  schemeDetails.stream().filter(s->s.getType().equals(SchemeDetailParamEnum.ORDER_DATA))
+                .collect(Collectors.toList());
+        List<String> newCode = codeService.getCode(IdTypeEnum.RESULT_FIELD,schemeDetails.size());
+        List<SchemeDetail> newSchemeDetailList = new ArrayList<>();
+        int i =0;
+        for (SchemeDetail schemeDetail : schemeDetails) {
+            if (i<2){//0,1开头的两个字段去掉
+                i++;
+                continue;
+            }
+            SchemeDetail schemeDetail1 = new SchemeDetail();
+            BeanUtils.copyProperties(schemeDetail,schemeDetail1);
+            schemeDetail1.setId(null);
+            schemeDetail1.setSchemeCode(copyFieldDto.getTargetSchemeCode());
+            schemeDetail1.setResultCode(newCode.get(i++));
+            newSchemeDetailList.add(schemeDetail1);
+        }
+        saveBatch(newSchemeDetailList);
     }
 }
 

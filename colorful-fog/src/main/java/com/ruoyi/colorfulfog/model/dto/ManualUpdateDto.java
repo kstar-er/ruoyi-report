@@ -23,7 +23,13 @@ public class ManualUpdateDto {
      */
     String fieldName;
     /**
+     * 要改哪个字段的数据
+     */
+    String fieldCode;
+    /**
      * 要修改成什么值
      */
-    String updateValue;
+    Object updateValue;
+
+    String updateUser;
 }

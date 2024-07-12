@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.ruoyi.common.core.domain.BaseEntity;
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -21,9 +23,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @TableName(value = "cwu_err_reason")
 public class ErrReason extends BaseClass {
-    @TableId(value = "id", type = IdType.AUTO)
-    @ApiModelProperty(value="")
-    private Integer id;
+
 
     /**
      * 依赖的主表code
@@ -64,4 +64,31 @@ public class ErrReason extends BaseClass {
     @TableField(value = "version")
     @ApiModelProperty(value="")
     private Integer version;
+
+    /**
+     * 计划编码
+     */
+    @TableField(value = "scheme_code")
+    String schemeCode;
+    /**
+     * 分类
+     */
+    @TableField(value = "sort")
+    String sort;
+    /**
+     * 应付应收
+     */
+    @TableField(value = "bill_type")
+    String billType;
+
+    @TableField(value = "depend_name")
+    String dependName;
+    @TableField(value = "scheme_name")
+    String schemeName;
+
+    /**
+     * 账单编码，导出时根据这个返回数据
+     */
+    @TableField(value = "bill_code")
+    String billCode;
 }

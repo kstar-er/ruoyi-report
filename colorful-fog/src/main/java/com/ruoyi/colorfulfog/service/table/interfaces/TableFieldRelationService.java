@@ -1,7 +1,7 @@
 package com.ruoyi.colorfulfog.service.table.interfaces;
 
-import com.baomidou.mybatisplus.extension.service.IService;
 import com.ruoyi.colorfulfog.model.TableFieldRelation;
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.ruoyi.colorfulfog.model.dto.AddTableFieldDto;
 
 import java.util.List;

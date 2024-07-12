@@ -151,7 +151,7 @@ const fullScreen = () => {
 let light = ref(true)
 const changeTheLight = () => {
   light.value = !light.value
-  localStorage.setItem('light', light.value)
+  sessionStorage.setItem('light', light.value)
   changeSelf()
   window.$eventBus.$emit('changeTheLight', light.value)
 }
@@ -172,7 +172,7 @@ const changeSelf = () => {
 }
 
 onMounted(() => {
-  let localLight = localStorage.getItem('light')
+  let localLight = sessionStorage.getItem('light')
   if (localLight) light.value = localLight === 'true'
   changeSelf()
   nextTick(() => {

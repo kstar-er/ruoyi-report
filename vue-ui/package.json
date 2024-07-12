@@ -9,6 +9,8 @@
     "test": "cross-env vue-cli-service build --mode test"
   },
   "dependencies": {
+    "@antv/x6": "^2.18.1",
+    "@antv/x6-plugin-selection": "^2.2.2",
     "@element-plus/icons-vue": "^2.0.10",
     "@kjgl77/datav-vue3": "^1.5.0",
     "address-parse": "^1.2.19",
@@ -28,6 +30,7 @@
     "screenfull": "^6.0.2",
     "swiper": "^9.0.3",
     "uglifyjs-webpack-plugin": "^2.2.0",
+    "vant": "^4.7.0",
     "vue": "^3.2.13",
     "vue-draggable-next": "^2.1.1",
     "vue-router": "^4.0.3",
@@ -37,7 +40,6 @@
     "watermark-dom": "^2.3.0",
     "watermark-plus": "^1.6.0",
     "xlsx": "^0.18.5",
-    "vant": "^4.7.0",
     "xlsx-js-style": "^1.2.0"
   },
   "devDependencies": {

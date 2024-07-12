@@ -7,7 +7,7 @@ const user = {
         title: "用户账号",
         dataKey: "userName",
         key: 'userName',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -15,7 +15,7 @@ const user = {
         title: "用户昵称",
         dataKey: "nickName",
         key: 'nickName',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -23,7 +23,7 @@ const user = {
         title: "用户类型",
         dataKey: "userType",
         key: 'userType',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -31,7 +31,7 @@ const user = {
         title: "用户性别",
         dataKey: "sex",
         key: 'sex',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -39,7 +39,7 @@ const user = {
         title: "用户邮箱",
         dataKey: "email",
         key: 'email',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -47,7 +47,7 @@ const user = {
         title: "用户头像",
         dataKey: "avatar",
         key: 'avatar',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -55,7 +55,7 @@ const user = {
         title: "帐号状态",
         dataKey: "status",
         key: 'status',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -63,7 +63,7 @@ const user = {
         title: "部门",
         dataKey: "deptName",
         key: 'deptName',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -71,7 +71,7 @@ const user = {
         title: "备注",
         dataKey: "remark",
         key: 'remark',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -79,7 +79,7 @@ const user = {
         title: "最后登录IP",
         dataKey: "loginIp",
         key: 'loginIp',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -87,7 +87,7 @@ const user = {
         title: "最后登录时间",
         dataKey: "loginDate",
         key: 'loginDate',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -95,7 +95,7 @@ const user = {
         title: "创建者",
         dataKey: "createBy",
         key: 'createBy',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -103,7 +103,7 @@ const user = {
         title: "创建时间",
         dataKey: "createTime",
         key: 'createTime',
-        width: 200,
+        width: 300,
         type: 'date',
         isShow: true,
         isFixed: false
@@ -111,7 +111,7 @@ const user = {
         title: "更新者",
         dataKey: "updateBy",
         key: 'updateBy',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -119,7 +119,7 @@ const user = {
         title: "更新时间",
         dataKey: "updateTime",
         key: 'updateTime',
-        width: 200,
+        width: 300,
         type: 'date',
         isShow: true,
         isFixed: false
@@ -130,7 +130,7 @@ const user = {
         title: "用户账号",
         dataKey: "userName",
         key: 'userName',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -138,7 +138,7 @@ const user = {
         title: "用户昵称",
         dataKey: "nickName",
         key: 'nickName',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -146,7 +146,7 @@ const user = {
         title: "用户类型",
         dataKey: "userType",
         key: 'userType',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -154,7 +154,7 @@ const user = {
         title: "用户性别",
         dataKey: "sex",
         key: 'sex',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -162,7 +162,7 @@ const user = {
         title: "用户邮箱",
         dataKey: "email",
         key: 'email',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -170,7 +170,7 @@ const user = {
         title: "用户头像",
         dataKey: "avatar",
         key: 'avatar',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -178,7 +178,7 @@ const user = {
         title: "帐号状态",
         dataKey: "status",
         key: 'status',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -186,7 +186,7 @@ const user = {
         title: "部门",
         dataKey: "deptName",
         key: 'deptName',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -194,7 +194,7 @@ const user = {
         title: "备注",
         dataKey: "remark",
         key: 'remark',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -202,7 +202,7 @@ const user = {
         title: "最后登录IP",
         dataKey: "loginIp",
         key: 'loginIp',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -210,7 +210,7 @@ const user = {
         title: "最后登录时间",
         dataKey: "loginDate",
         key: 'loginDate',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -218,7 +218,7 @@ const user = {
         title: "创建者",
         dataKey: "createBy",
         key: 'createBy',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -226,7 +226,7 @@ const user = {
         title: "创建时间",
         dataKey: "createTime",
         key: 'createTime',
-        width: 200,
+        width: 300,
         type: 'date',
         isShow: true,
         isFixed: false
@@ -234,7 +234,7 @@ const user = {
         title: "更新者",
         dataKey: "updateBy",
         key: 'updateBy',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -242,7 +242,7 @@ const user = {
         title: "更新时间",
         dataKey: "updateTime",
         key: 'updateTime',
-        width: 200,
+        width: 300,
         type: 'date',
         isShow: true,
         isFixed: false

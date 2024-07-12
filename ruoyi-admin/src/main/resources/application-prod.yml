@@ -5,7 +5,7 @@ spring.servlet.multipart.location: /ruoyi/server/temp
 spring.boot.admin.client:
   # 增加客户端开关
   enabled: false
-  url: http://localhost:9090/admin
+  url: http://${ip.location}:9090/admin
   instance:
     service-host-type: IP
   username: ruoyi
@@ -52,35 +52,17 @@ spring:
           driverClassName: com.mysql.cj.jdbc.Driver
           # jdbc 所有参数配置参考 https://lionli.blog.csdn.net/article/details/122018562
           # rewriteBatchedStatements=true 批处理优化 大幅提升批量插入更新删除性能(对数据库有性能损耗 使用批量操作应考虑性能问题)
-          url: jdbc:mysql://127.0.0.1:3306/ry-vue?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true
+          url: jdbc:mysql://${ip.location}:3306/test_colorful?useSSL=false&useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true&&autoReconnect=true
           username: root
-          password: kxhpxFPM5XNeMTnX
+          password: 123456
         # 从库数据源
-        slave:
-          lazy: true
-          type: ${spring.datasource.type}
-          driverClassName: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://localhost:3306/ry-vue?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true
-          username:
-          password:
-      #        oracle:
-      #          type: ${spring.datasource.type}
-      #          driverClassName: oracle.jdbc.OracleDriver
-      #          url: jdbc:oracle:thin:@//localhost:1521/XE
-      #          username: ROOT
-      #          password: root
-      #        postgres:
-      #          type: ${spring.datasource.type}
-      #          driverClassName: org.postgresql.Driver
-      #          url: jdbc:postgresql://localhost:5432/postgres?useUnicode=true&characterEncoding=utf8&useSSL=true&autoReconnect=true&reWriteBatchedInserts=true
-      #          username: root
-      #          password: root
-      #        sqlserver:
-      #          type: ${spring.datasource.type}
-      #          driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
-      #          url: jdbc:sqlserver://localhost:1433;DatabaseName=tempdb;SelectMethod=cursor;encrypt=false;rewriteBatchedStatements=true
-      #          username: SA
-      #          password: root
+#        slave:
+#          lazy: true
+#          type: ${spring.datasource.type}
+#          driverClassName: com.mysql.cj.jdbc.Driver
+#          url: jdbc:mysql://${ip.location}:3306/ry-vue?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true
+#          username:
+#          password:
       hikari:
         # 最大连接池数量
         maxPoolSize: 20
@@ -96,18 +78,27 @@ spring:
         maxLifetime: 1800000
         # 多久检查一次连接的活性
         keepaliveTime: 30000
-
+--- # mongodb 配置
+spring:
+  data:
+    mongodb:
+      host: ${ip.location}
+      port: 27017
+      database: colorful
+      authentication-database: admin
+      username: admin
+      password: 123456
 --- # redis 单机配置(单机与集群只能开启一个另一个需要注释掉)
 spring:
   redis:
     # 地址
-    host: localhost
+    host: ${ip.location}
     # 端口，默认为6379
     port: 6379
     # 数据库索引
     database: 0
     # 密码(如没有密码请注释掉)
-    password: xxl@redise1439fdsh
+    password: 123456
     # 连接超时时间
     timeout: 10s
     # 是否开启ssl

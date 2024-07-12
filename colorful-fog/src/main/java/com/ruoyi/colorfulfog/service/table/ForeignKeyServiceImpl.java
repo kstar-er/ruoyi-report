@@ -1,24 +1,27 @@
 package com.ruoyi.colorfulfog.service.table;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.ruoyi.colorfulfog.config.exception.GlobalException;
-import com.ruoyi.colorfulfog.mapper.ForeignKeyMapper;
-import com.ruoyi.colorfulfog.model.ForeignKey;
-import com.ruoyi.colorfulfog.service.table.interfaces.ForeignKeyService;
+import com.ruoyi.colorfulfog.model.OrderTableRelation;
+import com.ruoyi.common.core.exception.GlobalException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.ruoyi.colorfulfog.mapper.ForeignKeyMapper;
+import com.ruoyi.colorfulfog.model.ForeignKey;
+import com.ruoyi.colorfulfog.service.table.interfaces.ForeignKeyService;
 @Service
 public class ForeignKeyServiceImpl extends ServiceImpl<ForeignKeyMapper, ForeignKey> implements ForeignKeyService{
 
     @Override
-    public  Map<String, Map<String,ForeignKey>> getForeignKeyMap(List<Integer> idList){
+    public  Map<String, Map<String,ForeignKey>> getForeignKeyMap(List<Long> idList){
         List<ForeignKey> foreignKeys = list(new LambdaQueryWrapper<ForeignKey>()
                 .in(ForeignKey::getTableId,idList));
 
@@ -36,6 +39,13 @@ public class ForeignKeyServiceImpl extends ServiceImpl<ForeignKeyMapper, Foreign
             foreignKeyMap.get(tableName).put(foreignTable, foreignKey);
         }
         return foreignKeyMap;
+    }
+    @Override
+    public void deleteByOrderTableId(List<OrderTableRelation> orderTableRelations){
+        List<String> tableNames = orderTableRelations.stream().map(OrderTableRelation::getOrderTableName).collect(Collectors.toList());
+        List<ForeignKey> foreignKeys = list(new LambdaQueryWrapper<ForeignKey>().eq(ForeignKey::getTableName,tableNames));
+        List<Long> foreignKeyIds = foreignKeys.stream().map(ForeignKey::getTableId).collect(Collectors.toList());
+        removeBatchByIds(foreignKeyIds);
     }
 
     @Override

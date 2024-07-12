@@ -15,6 +15,7 @@ import com.ruoyi.common.core.domain.PageQuery;
 import com.ruoyi.common.core.domain.entity.SysDept;
 import com.ruoyi.common.core.domain.entity.SysRole;
 import com.ruoyi.common.core.domain.entity.SysUser;
+import com.ruoyi.common.core.exception.user.UserException;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.core.service.UserService;
 import com.ruoyi.common.exception.ServiceException;
@@ -70,6 +71,19 @@ public class SysUserServiceImpl implements ISysUserService, UserService {
     public List<SysUser> selectUserList(SysUser user) {
         return baseMapper.selectUserList(this.buildQueryWrapper(user));
     }
+
+    @Override
+    public Boolean registerUserInfo(SysUser sysUser) {
+        String username = sysUser.getUserName();
+//        if (!("true".equals(configService.selectConfigByKey("sys.account.registerUser")))) {
+//            throw new com.ruoyi.common.core.exception.ServiceException("当前系统没有开启注册功能");
+//        }
+        if (!this.checkUserNameUnique(sysUser)) {
+            throw new UserException("user.register.save.error", username);
+        }
+        return this.registerUser(sysUser);
+    }
+
 
     private Wrapper<SysUser> buildQueryWrapper(SysUser user) {
         Map<String, Object> params = user.getParams();

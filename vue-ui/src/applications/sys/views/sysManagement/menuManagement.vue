@@ -8,18 +8,25 @@
     </div>
     <div class="extend-handle">
       <div class="extend-handle-left">
-        <xButton
-          class="mr10"
+        <el-button
+          class="handle-btn"
+          color="#4a78bd"
+          style="color: #666"
+          plain
           @click="close"
         >
           全部折叠
-        </xButton>
-        <xButton
+        </el-button>
+        <el-button
           v-authorityHandle="'system:menu:add'"
+          class="handle-btn"
+          color="#4a78bd"
+          style="color: #666"
+          plain
           @click="addRow"
         >
           新增
-        </xButton>
+        </el-button>
       </div>
     </div>
     <v-table
@@ -41,13 +48,13 @@
       :for-mat-data="dataSource.forMatData"
       :customize-cell-renderer="customizeCellRenderer"
       :end-handle-width="140"
-      @selection-change="dataSource.selectionChange($event,dataSource,proxy.$refs.table)"
+      @selectionChange="dataSource.selectionChange($event,dataSource,proxy.$refs.table)"
       @refresh="dataSource.initData(dataSource, proxy.$refs.table)"
-      @edit-row="goCompile"
+      @editRow="goCompile"
 
       @current-change="dataSource.currentPageChange($event,dataSource,proxy.$refs.table)"
-      @size-change="dataSource.pageSizeChange($event,dataSource,proxy.$refs.table)"
-      @edit-table-header="isShowEditTableHeader = true"
+      @sizeChange="dataSource.pageSizeChange($event,dataSource,proxy.$refs.table)"
+      @editTableHeader="isShowEditTableHeader = true"
     />
     <el-drawer
       v-model="isShowEditTableHeader"
@@ -87,8 +94,8 @@
       :form-upload-el="editControlCommon.formUploadEl"
       :form-time-and-number="editControlCommon.formTimeAndNumber"
       @close-dialog="editControlCommon.isShow=false"
-      @emit-open-dialog="editControlCommon.emitOpenDialog"
-      @input-done="editControlCommon.inputDone"
+      @emitOpenDialog="editControlCommon.emitOpenDialog"
+      @inputDone="editControlCommon.inputDone"
     >
       <template #customOperation>
         <div class="flex-center ml10">

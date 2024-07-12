@@ -8,8 +8,7 @@ class DataSource extends PublicDataSource {
     deleteUri = '/',
     selectOneUri = '/',
     pageSize = 20,
-    tableHeader,
-    listMethod = 'post' // 数据请求的方法 post 或 get
+    tableHeader
   } = {}){
     super({
       modules,
@@ -17,8 +16,7 @@ class DataSource extends PublicDataSource {
       deleteUri,
       selectOneUri,
       pageSize,
-      tableHeader,
-      listMethod
+      tableHeader
     })
   }
 

@@ -1,14 +1,14 @@
 /* eslint-disable */
 const models = [
-  'warehouse_pro' // 基础后台框架
+  'sys' // 财务系统
+  // 'jumper' // 中转页
 ]
 
 const modelsConfig = {
-  warehouse_pro: {
-    ip: '192.168.28.108',
+  sys: {
     pages: {
       index: {
-        title: process.env.VUE_APP_TITLE === 'pro' ? 'Hello World' : 'Hello World',
+        title: process.env.VUE_APP_TITLE === 'pro' ? '基础框架' : '测试',
         entry: "src/applications/sys/main.js",
         template: "src/applications/sys/index.html",
         filename: "index.html"

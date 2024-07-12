@@ -1,3 +1,4 @@
+
 const { defineConfig } = require('@vue/cli-service')
 const path = require('path')
 const UglifyPlugin = require("uglifyjs-webpack-plugin")
@@ -6,7 +7,6 @@ const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin')
 const zlib = require('zlib')
 const runningProject = require('./models')
 
-delete runningProject.config.ip
 function addStyleResource(rule) {
   rule.use('style-resource')
     .loader('style-resources-loader')
@@ -41,6 +41,7 @@ module.exports = defineConfig({
       additionalFormatters: [],
       additionalTransformers: []
     })]
+
   } : {
     resolve: {
       alias: {
@@ -110,7 +111,7 @@ module.exports = defineConfig({
     // }
   },
   chainWebpack: (config) => {
-    const types = ['vue-modules', 'vue', 'normal-modules', 'normal']
+    const types = ['vue']
     types.forEach(type => addStyleResource(config.module.rule('less').oneOf(type)))
     if (process.env.NODE_ENV === "development") return
     config.optimization.splitChunks({

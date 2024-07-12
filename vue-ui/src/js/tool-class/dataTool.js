@@ -86,6 +86,16 @@ class DataTool {
     return XLSX.utils.sheet_to_json(worksheet)
   }
 
+  isTimestamp(timestamp) {
+
+    let regex = /^\d{13}$/
+    if (regex.test(timestamp)) {
+      let date = new Date(+timestamp)
+      return !isNaN(date.getTime())
+    }
+    return false
+  }
+
   exportExcel(header, data, title, style) {
     const wb = XLSX.utils.book_new()
     const ws = XLSX.utils.aoa_to_sheet([header,
@@ -181,6 +191,16 @@ class DataTool {
         })
       }
     }
+  }
+
+  /**
+ * 随机生成字符串
+ * @param len 指定生成字符串长度
+ */
+  static randomString(length, chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ') {
+    let result = ''
+    for (let i = length; i > 0; --i) result += chars[Math.floor(Math.random() * chars.length)]
+    return result
   }
 }
 

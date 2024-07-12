@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.ruoyi.colorfulfog.constant.enums.ResutlTypeEnum;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
 @Data
@@ -19,6 +21,7 @@ public class BillResult {
      * 绑定的字段的id
      */
     @TableField(value = "result_code")
+    @ApiModelProperty(value = "绑定的字段的code")
     private String resultCode;
 
 
@@ -55,7 +58,7 @@ public class BillResult {
      * 字段的类型
      */
     @TableField(value = "type")
-    private String type;
+    private ResutlTypeEnum type;
     /**
      * 计算状态：
      *  计算失败：0
@@ -75,6 +78,7 @@ public class BillResult {
         MANUAL(2, "手动添加");
         @Getter
         final Integer status;
+        @Getter
         final String msg;
         CalculateStatusEnum(Integer status, String msg) {
             this.status = status;

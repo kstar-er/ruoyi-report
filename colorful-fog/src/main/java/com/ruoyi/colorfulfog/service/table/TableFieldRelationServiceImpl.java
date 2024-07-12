@@ -1,21 +1,24 @@
 package com.ruoyi.colorfulfog.service.table;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.ruoyi.colorfulfog.config.exception.GlobalException;
-import com.ruoyi.colorfulfog.mapper.TableFieldRelationMapper;
-import com.ruoyi.colorfulfog.model.TableFieldRelation;
 import com.ruoyi.colorfulfog.model.dto.AddTableFieldDto;
 import com.ruoyi.colorfulfog.service.table.interfaces.DataSourceService;
-import com.ruoyi.colorfulfog.service.table.interfaces.TableFieldRelationService;
+import com.ruoyi.common.core.exception.GlobalException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.ruoyi.colorfulfog.model.TableFieldRelation;
+import com.ruoyi.colorfulfog.mapper.TableFieldRelationMapper;
+import com.ruoyi.colorfulfog.service.table.interfaces.TableFieldRelationService;
 
 
 @Slf4j
@@ -74,6 +77,12 @@ public class TableFieldRelationServiceImpl extends ServiceImpl<TableFieldRelatio
     @Override
     public void saveTableFileList(AddTableFieldDto addTableFieldDto) {
         List<TableFieldRelation> tableFieldRelationList = new ArrayList<>();
+        List<String> tableNameList = addTableFieldDto.getTableNameList();
+        List<TableFieldRelation> old = list(new LambdaQueryWrapper<TableFieldRelation>()
+                .in(TableFieldRelation::getTableName,tableNameList));
+        if (!old.isEmpty()){
+            throw new GlobalException("该表"+old.stream().map(TableFieldRelation::getTableName).collect(Collectors.toList())+"已导入过字段，请勿重复导入。如有更新请使用更新功能");
+        }
         for (String tableName : addTableFieldDto.getTableNameList()) {
             List<Map> mapList = getTableFile(tableName,addTableFieldDto.getDataSourceId());
             for (Map map : mapList) {

@@ -1,7 +1,8 @@
 package com.ruoyi.colorfulfog.service.table.interfaces;
 
-import com.baomidou.mybatisplus.extension.service.IService;
 import com.ruoyi.colorfulfog.model.ErrReason;
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.ruoyi.colorfulfog.model.vo.ExportErrReason;
 
 import java.util.List;
 
@@ -15,5 +16,6 @@ public interface ErrReasonService extends IService<ErrReason>{
     boolean dealErrReason(List<ErrReason> errReason);
 
     void saveErrReasonBatch(List<ErrReason> errReason);
+    ExportErrReason exportErrReasonList(List<Integer> errReason);
 
 }

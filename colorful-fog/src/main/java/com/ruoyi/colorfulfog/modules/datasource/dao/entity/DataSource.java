@@ -2,8 +2,10 @@
 package com.ruoyi.colorfulfog.modules.datasource.dao.entity;
 
 
+
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.ruoyi.colorfulfog.code.ResponseCode;
 import com.ruoyi.colorfulfog.model.BaseClass;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;

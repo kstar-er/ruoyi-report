@@ -1,8 +1,6 @@
 package com.ruoyi.colorfulfog.modules.datasource.config;
 
-
-import cn.hutool.json.JSON;
-import cn.hutool.json.JSONUtil;
+import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
@@ -18,6 +16,7 @@ import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
+
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicHeader;
@@ -140,7 +139,7 @@ public class HttpClientConfig {
                     response.headerIterator(HTTP.CONN_KEEP_ALIVE));
             while (it.hasNext()) {
                 HeaderElement he = it.nextElement();
-                log.info("HeaderElement:{}", JSONUtil.toJsonStr(he));
+                log.info("HeaderElement:{}", JSON.toJSONString(he));
                 String param = he.getName();
                 String value = he.getValue();
                 if (value != null && "timeout".equalsIgnoreCase(param)) {

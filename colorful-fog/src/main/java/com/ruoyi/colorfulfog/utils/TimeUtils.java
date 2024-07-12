@@ -1,6 +1,8 @@
 package com.ruoyi.colorfulfog.utils;
 
+import com.ruoyi.colorfulfog.constant.enums.ExecutionTimeUnit;
 import com.ruoyi.colorfulfog.model.entity.DateRange;
+import io.swagger.models.auth.In;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -52,6 +54,22 @@ public class TimeUtils {
         calendar.set(Calendar.MONTH, calendar.get(Calendar.MONTH) + move);
         calendar.set(Calendar.DAY_OF_MONTH, day);
         calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTime().getTime(); // 第一次getTime是Date，第二次是Date->Long
+    }
+
+    /**
+     * 获得传入参数变动的某日某时零分零秒
+     * @return Long
+     */
+    public static Long initDateByDayCal(int move,int hour){
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.set(Calendar.MONTH, calendar.get(Calendar.MONTH) );
+        calendar.set(Calendar.DAY_OF_MONTH, calendar.get(Calendar.DAY_OF_MONTH)+move);
+        calendar.set(Calendar.HOUR_OF_DAY, hour);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
@@ -240,9 +258,14 @@ public class TimeUtils {
      * @param timeFormula
      * @return
      */
-    public static Long transTimeFormula(String timeFormula){
+    public static Long transTimeFormula(String timeFormula, ExecutionTimeUnit executionTimeUnit){
         List<String> arr = Arrays.asList(timeFormula.split("\\."));
-        return initDateByMonCal(Integer.parseInt(arr.get(0)),Integer.parseInt(arr.get(1)));
+        if(executionTimeUnit.equals(ExecutionTimeUnit.DAILY)){
+            return initDateByDayCal(Integer.parseInt(arr.get(0)),Integer.parseInt(arr.get(1)));
+        }else if (executionTimeUnit.equals(ExecutionTimeUnit.MONTHLY)){
+            return initDateByMonCal(Integer.parseInt(arr.get(0)),Integer.parseInt(arr.get(1)));
+        }
+        throw new RuntimeException("时间公式格式错误");
     }
     public static String transCostTermFormula(String costTermFormula){
         return getMon(initDateByMonCal(Integer.parseInt(costTermFormula),1));

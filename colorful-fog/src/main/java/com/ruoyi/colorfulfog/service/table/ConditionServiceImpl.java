@@ -2,9 +2,10 @@ package com.ruoyi.colorfulfog.service.table;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.ruoyi.colorfulfog.mapper.ConditionMapper;
 import com.ruoyi.colorfulfog.model.Condition;
 import com.ruoyi.colorfulfog.service.table.interfaces.ConditionService;
+import com.ruoyi.colorfulfog.mapper.ConditionMapper;
+import lombok.Data;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

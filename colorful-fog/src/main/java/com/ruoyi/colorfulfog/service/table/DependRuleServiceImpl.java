@@ -2,14 +2,15 @@ package com.ruoyi.colorfulfog.service.table;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.ruoyi.colorfulfog.mapper.DependRuleMapper;
-import com.ruoyi.colorfulfog.model.DependRule;
-import com.ruoyi.colorfulfog.service.table.interfaces.DependRuleService;
 import org.springframework.stereotype.Service;
-
+import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.ruoyi.colorfulfog.model.DependRule;
+import com.ruoyi.colorfulfog.mapper.DependRuleMapper;
+import com.ruoyi.colorfulfog.service.table.interfaces.DependRuleService;
 
 @Service
 public class DependRuleServiceImpl extends ServiceImpl<DependRuleMapper, DependRule> implements DependRuleService {

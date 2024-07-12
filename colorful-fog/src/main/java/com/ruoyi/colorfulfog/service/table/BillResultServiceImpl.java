@@ -2,23 +2,31 @@ package com.ruoyi.colorfulfog.service.table;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ruoyi.colorfulfog.config.exception.GlobalException;
+import com.ruoyi.colorfulfog.constant.enums.BillCheckStatusEnum;
+import com.ruoyi.colorfulfog.constant.enums.CollectDataTypeEnum;
+import com.ruoyi.colorfulfog.constant.enums.CollectObjectEnum;
 import com.ruoyi.colorfulfog.constant.enums.ErrorCodeEnum;
-import com.ruoyi.colorfulfog.mapper.BillResultMapper;
-import com.ruoyi.colorfulfog.model.BillMain;
-import com.ruoyi.colorfulfog.model.BillResult;
 import com.ruoyi.colorfulfog.model.dto.BillResultFlashDto;
 import com.ruoyi.colorfulfog.model.dto.CollectResultDto;
 import com.ruoyi.colorfulfog.model.dto.ManualUpdateDto;
-import com.ruoyi.colorfulfog.model.vo.BillResultDataVO;
-import com.ruoyi.colorfulfog.model.vo.ListBillResultMapByTimeVO;
+import com.ruoyi.colorfulfog.model.mongodb.BaseData;
+import com.ruoyi.colorfulfog.model.mongodb.BillData;
+import com.ruoyi.colorfulfog.model.mongodb.CollectBillData;
 import com.ruoyi.colorfulfog.service.table.interfaces.BillMainService;
-import com.ruoyi.colorfulfog.service.table.interfaces.BillResultService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.ruoyi.colorfulfog.mapper.BillResultMapper;
+import com.ruoyi.colorfulfog.model.BillResult;
+import com.ruoyi.colorfulfog.service.table.interfaces.BillResultService;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -28,6 +36,8 @@ public class BillResultServiceImpl extends ServiceImpl<BillResultMapper, BillRes
 
     @Autowired
     BillMainService billMainService;
+    @Autowired
+    MongoTemplate mongoTemplate;
     @Override
     public Map<String, List<BillResult>> listBillCodeResultMapByBillCode(List<String> billCode){
         if (CollectionUtils.isEmpty(billCode)){
@@ -44,45 +54,73 @@ public class BillResultServiceImpl extends ServiceImpl<BillResultMapper, BillRes
      * @return
      */
     @Override
-    public ListBillResultMapByTimeVO listBillResultMapByTime(CollectResultDto collectResultDto){
-        List<BillResult> billResultList = list(new LambdaQueryWrapper<BillResult>()
-                .eq(BillResult::getSchemeCode,collectResultDto.getSchemeCode())
-                .eq(BillResult::getResultCode,collectResultDto.getTimeFieldCode())
-                .ge(BillResult::getValue,collectResultDto.getTimeStart())
-                .le(BillResult::getValue,collectResultDto.getTimeEnd()));
-        List<String> billCodeList = billResultList.stream().map(BillResult::getBillCode).collect(Collectors.toList());
-        Map<String, List<BillResult>> billResultMap =  listBillCodeResultMapByBillCode(billCodeList);
-        List<BillResultDataVO> billResultDataVOList = new ArrayList<>();
-        List<BillMain> billMainList ;
-        if (billCodeList.isEmpty()){
-            throw new GlobalException(ErrorCodeEnum.PARAMETER_ERROR,"对应时间账单数据未生成");
+    public List<BaseData> listBillResultMapByTime(CollectResultDto collectResultDto, CollectObjectEnum collectDataTypeEnum){
+        Query query = new Query();
+        query.addCriteria(Criteria.where("tagTime").gte(collectResultDto.getTimeStart()).lte(collectResultDto.getTimeEnd())
+                .and("schemeCode").is(collectResultDto.getSchemeCode()));
+        if (collectResultDto.getBelongArchiveCode()!=null){
+            query.addCriteria(Criteria.where("belongArchiveCode").is(collectResultDto.getBelongArchiveCode()));
+            Query oldQuery = new Query();
+            oldQuery.addCriteria(Criteria.where("schemeCode").is(collectResultDto.getCollectSchemeCode()));
+            oldQuery.addCriteria(Criteria.where("costTerm").is(collectResultDto.getCostTerm()));
+            oldQuery.addCriteria(Criteria.where("belongArchiveCode").is(collectResultDto.getBelongArchiveCode()));
+            List<CollectBillData> collectBillData = mongoTemplate.find(oldQuery,CollectBillData.class);
+            if (!collectBillData.isEmpty()){
+                throw new GlobalException(ErrorCodeEnum.PARAMETER_ERROR,"该时间段内该商家已经存在汇总数据。请勿重复生成");
+            }
+        }else{
+            Query oldQuery = new Query();
+            oldQuery.addCriteria(Criteria.where("schemeCode").is(collectResultDto.getCollectSchemeCode()));
+            oldQuery.addCriteria(Criteria.where("costTerm").is(collectResultDto.getCostTerm()));
+            List<CollectBillData> collectBillData = mongoTemplate.find(oldQuery,CollectBillData.class);
+            if (!collectBillData.isEmpty()){
+                throw new GlobalException(ErrorCodeEnum.PARAMETER_ERROR,"该时间段内已经存在汇总数据。若需要请对单独商家进行生成汇总数据");
+            }
+            //查询全部,如果在时间范围内有已经生成的汇总数据，则不再生成
         }
-        billMainList = billMainService.list(new LambdaQueryWrapper<BillMain>().in(BillMain::getBillCode, billCodeList));
-        //  遍历billMainList，根据billMainList中的billCode去billResultMap中获取对应的resultDataList，然后存放到List<BillResultDataVO>中
-        for (BillMain main : billMainList) {
-            // todo 可以优化，减少将返回的参数变成，BillResultValueVO，减少传输的数据量
-            billResultDataVOList.add(new BillResultDataVO(main, billResultMap.get(main.getBillCode())));
+        if (collectDataTypeEnum.equals(CollectObjectEnum.BILL)){
+            List<BillData> billResultList = mongoTemplate.find(query,BillData.class);
+            return new ArrayList<>(billResultList);
+        }else if (collectDataTypeEnum.equals(CollectObjectEnum.COLLECT)){
+            List<CollectBillData> billResultList = mongoTemplate.find(query,CollectBillData.class);
+            return new ArrayList<>(billResultList);
         }
-        return ListBillResultMapByTimeVO.builder()
-                .billMainList(billMainList)
-                .billResultDataVOList(billResultDataVOList)
-                .build();
+      throw new GlobalException(ErrorCodeEnum.PARAMETER_ERROR,"汇总类型不存在");
     }
     @Override
-    public  List<BillResult> listByBillCodeAndName(List<ManualUpdateDto> manualUpdateDtoList){
-        return  baseMapper.selectByCodeAndName(manualUpdateDtoList);
+    public List<BillData> listByBillCodeAndName(List<ManualUpdateDto> manualUpdateDtoList){
+        return mongoTemplate.find(new Query(Criteria.where("billCode")
+                .in(manualUpdateDtoList.stream().map(ManualUpdateDto::getBillCode).collect(Collectors.toList())))
+                ,BillData.class);
     }
     @Override
-    public  List<BillResult> listByBillCode(List<String> billCode){
-        return list(new LambdaQueryWrapper<BillResult>()
-                .in(BillResult::getBillCode, billCode));
+    public  List<BillData> listByBillCode(List<String> billCode){
+        return mongoTemplate.find(new Query(Criteria.where("billCode").in(billCode)),BillData.class);
     }
     @Override
-    public List<BillResult> listBySchemeAndBatch(BillResultFlashDto billResultDto){
-        return list(new LambdaQueryWrapper<BillResult>()
-                .eq(BillResult::getBatchCode,billResultDto.getBatchCode()));
+    public List<BillData> listBySchemeAndBatch(BillResultFlashDto billResultDto){
+        Query query = new Query();
+        if (billResultDto.getBatchCode()!=null){
+            query.addCriteria(Criteria.where("batchCode").is(billResultDto.getBatchCode()));
+        }
+        if (billResultDto.getCollectResultCode()!=null){
+            query.addCriteria(Criteria.where("collectResultCode").is(billResultDto.getCollectResultCode()));
+        }
+
+        return mongoTemplate.find(query, BillData.class);
+
     }
 
+
+    @Override
+    public List<String> testSave(){
+        BillData result = new BillData();
+        result.setId("123L");
+        result.setData(new HashMap<>());
+
+        mongoTemplate.save(result);
+        return null;
+    }
 }
 
 

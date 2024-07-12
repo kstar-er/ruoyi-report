@@ -6,6 +6,7 @@
         :title="title"
         top="4%"
         :close-on-click-modal="false"
+        :close-on-press-escape="false"
         :show-close="false"
         :width="width"
         lock-scroll
@@ -20,6 +21,7 @@
               class="dialog-close-btn"
               type="danger" icon="CloseBold"
               circle
+              plain
               @click="closeDialog"
             />
           </div>
@@ -45,8 +47,8 @@
               <template #label>
                 <el-popover
                   v-if="item.illustrate" placement="top"
-                  width="320"
-                  :hide-after="200"
+                  width="300"
+                  :hide-after="0"
                 >
                   <template #reference>
                     <el-icon style="color:orange">
@@ -58,7 +60,7 @@
                     <el-link
                       v-if="item.key==='mapLongitude'||item.key==='mapLatitude'"
                       href="https://lbs.qq.com/getPoint/" target="_blank"
-                      class="inline-block"
+                      class="ml10"
                       type="primary"
                     >
                       点击跳转拾取经纬度
@@ -91,6 +93,7 @@
               >
                 <el-radio
                   v-for="option in item.options" :key="option.label"
+                  :label="option.value"
                   :value="option.value"
                 >
                   {{ option.label }}
@@ -98,57 +101,7 @@
               </el-radio-group>
             </el-form-item>
             <div />
-            <el-form-item
-              v-for="item in formTimeAndNumber"
-              :key="item.key"
-              :label="item.title"
-              :rules="item.rules"
-              :prop="item.key"
-              class="mr10"
-            >
-              <el-time-picker
-                v-if="item.element === 'timerange'"
-                v-model="myformData[item.key]"
-                is-range
-                range-separator="至"
-                start-placeholder="开始时间"
-                style="width:200px"
-                end-placeholder="结束时间"
-              />
-              <el-date-picker
-                v-if="item.element === 'date'"
-                v-model="myformData[item.key]"
-                :placeholder="`请输入${item.title}`"
-                range-separator="至"
-                start-placeholder="开始时间"
-                style="width:220"
-                end-placeholder="结束时间"
-                value-format="YYYY-MM-DD HH:mm:ss"
-                :disabled="item.disabled"
-              />
-              <el-date-picker
-                v-if="item.element === 'datetimerange'"
-                v-model="myformData[item.key]"
-                type="datetimerange"
-                range-separator="至"
-                start-placeholder="开始时间"
-                style="width:200px"
-                end-placeholder="结束时间"
-                value-format="YYYY-MM-DD HH:mm:ss"
-                :disabled="item.disabled"
-              />
 
-              <el-input-number
-                v-if="item.element === 'number'"
-                v-model="myformData[item.key]" :disabled="item.disabled"
-                :min="0"
-                :max="item.max?item.max:100000000"
-                controls-position="right"
-                placeholder="1"
-                size="small"
-              />
-            </el-form-item>
-            <div />
             <el-form-item
               v-for="item in formSelectEl"
               :key="item.key"
@@ -182,6 +135,7 @@
                 <el-radio
                   v-for="option in item.options" :key="option.label"
                   :label="option.value"
+                  :value="option.value"
                 >
                   {{ option.label }}
                 </el-radio>
@@ -214,7 +168,6 @@
                 show-checkbox
                 check-on-click-node
                 :disabled="item.disabled"
-                @check="item.change"
               />
               <el-cascader
                 v-if="item.element === 'proAndCityAndArea'"
@@ -222,11 +175,71 @@
                 style="width:220px"
                 :disabled="item.disabled"
                 :placeholder="`请选择${item.title}`"
-                :options="pcasData"
+                :options="pcaTextArr"
                 collapse-tags
                 collapse-tags-tooltip
-                :props="cascaderProps"
                 @change="handleChange"
+              />
+            </el-form-item>
+            <div />
+            <el-form-item
+              v-for="item in formTimeAndNumber"
+              :key="item.key"
+              :label="item.title"
+              :rules="item.rules"
+              :prop="item.key"
+              class="mr10"
+            >
+              <el-time-picker
+                v-if="item.element === 'timerange'"
+                v-model="myformData[item.key]"
+                is-range
+                range-separator="至"
+                start-placeholder="开始时间"
+                style="width:200px"
+                end-placeholder="结束时间"
+              />
+              <el-date-picker
+                v-if="item.element === 'datetimerange'"
+                v-model="myformData[item.key]"
+                type="datetimerange"
+                range-separator="至"
+                start-placeholder="开始时间"
+                style="width:200px"
+                end-placeholder="结束时间"
+                value-format="YYYY-MM-DD HH:mm:ss"
+                :disabled="item.disabled"
+              />
+              <el-date-picker
+                v-if="item.element === 'daterange'"
+                v-model="myformData[item.key]"
+                type="daterange"
+                range-separator="至"
+                start-placeholder="开始时间"
+                style="width:200px"
+                end-placeholder="结束时间"
+                value-format="YYYY-MM-DD"
+                :disabled="item.disabled"
+              />
+              <el-date-picker
+                v-if="item.element === 'date'"
+                v-model="myformData[item.key]"
+                :type="item.type"
+                range-separator="至"
+                start-placeholder="开始时间"
+                style="width:200px"
+                end-placeholder="结束时间"
+                value-format="YYYY-MM"
+                :disabled="item.disabled"
+              />
+              <el-input-number
+                v-if="item.element === 'number'"
+                v-model="myformData[item.key]" :disabled="item.disabled"
+                :min="0"
+                :max="item.max?item.max:100000000"
+                controls-position="right"
+                placeholder="1"
+                size="small"
               />
             </el-form-item>
             <div />
@@ -356,23 +369,23 @@
         </div>
 
         <div class="mt10">
-          <el-button
+          <xButton
             :loading="loading"
             type="primary" style="float:right;margin-right:10px"
             @click="submitForm"
           >
-            确定
-          </el-button>
-          <el-button
+            {{ confirmText }}
+          </xButton>
+          <xButton
             type="danger" style="float:right;margin-right:10px"
             @click="closeDialog"
           >
             取消
-          </el-button>
+          </xButton>
         </div>
       </el-dialog>
     </div>
-    <div v-else class="detail-form">
+    <div v-else v-loading="loading">
       <el-form
         ref="ruleFormRef"
         autocomplete="off"
@@ -393,7 +406,8 @@
           <template #label>
             <el-popover
               v-if="item.illustrate" placement="top"
-              :hide-after="200"
+              width="300"
+              :hide-after="0"
             >
               <template #reference>
                 <el-icon style="color:orange">
@@ -405,7 +419,7 @@
                 <el-link
                   v-if="item.key==='mapLongitude'||item.key==='mapLatitude'"
                   href="https://lbs.qq.com/getPoint/" target="_blank"
-                  class="ml10 inline-block"
+                  class="ml10"
                   type="primary"
                 >
                   点击跳转拾取经纬度
@@ -438,6 +452,7 @@
           >
             <el-radio
               v-for="option in item.options" :key="option.label"
+              :label="option.value"
               :value="option.value"
             >
               {{ option.label }}
@@ -445,57 +460,7 @@
           </el-radio-group>
         </el-form-item>
         <div />
-        <el-form-item
-          v-for="item in formTimeAndNumber"
-          :key="item.key"
-          :label="item.title"
-          :rules="item.rules"
-          :prop="item.key"
-          class="mr10"
-        >
-          <el-time-picker
-            v-if="item.element === 'timerange'"
-            v-model="myformData[item.key]"
-            is-range
-            range-separator="至"
-            start-placeholder="开始时间"
-            style="width:200px"
-            end-placeholder="结束时间"
-          />
-          <el-date-picker
-            v-if="item.element === 'date'"
-            v-model="myformData[item.key]"
-            :placeholder="`请输入${item.title}`"
-            range-separator="至"
-            start-placeholder="开始时间"
-            style="width:220px"
-            end-placeholder="结束时间"
-            value-format="YYYY-MM-DD HH:mm:ss"
-            :disabled="item.disabled"
-          />
-          <el-date-picker
-            v-if="item.element === 'datetimerange'"
-            v-model="myformData[item.key]"
-            type="datetimerange"
-            range-separator="至"
-            start-placeholder="开始时间"
-            style="width:200px"
-            end-placeholder="结束时间"
-            value-format="YYYY-MM-DD HH:mm:ss"
-            :disabled="item.disabled"
-          />
 
-          <el-input-number
-            v-if="item.element === 'number'"
-            v-model="myformData[item.key]" :disabled="item.disabled"
-            :min="0"
-            :max="item.max?item.max:100000000"
-            controls-position="right"
-            placeholder="1"
-            size="small"
-          />
-        </el-form-item>
-        <div />
         <el-form-item
           v-for="item in formSelectEl"
           :key="item.key"
@@ -521,6 +486,14 @@
             </el-popover>
             {{ item.title }}
           </template>
+          <el-checkbox-group v-if="item.element === 'check'" v-model="myformData[item.key]">
+            <el-checkbox
+              v-for="option in item.options" :key="option.value"
+              :disabled="option.disabled"
+              :label="option.label" :value="option.value"
+            />
+          </el-checkbox-group>
+
           <el-radio-group
             v-if="item.element === 'radio'" v-model="myformData[item.key]"
             :disabled="item.disabled"
@@ -529,6 +502,7 @@
             <el-radio
               v-for="option in item.options" :key="option.label"
               :label="option.value"
+              :value="option.value"
             >
               {{ option.label }}
             </el-radio>
@@ -561,7 +535,6 @@
             show-checkbox
             check-on-click-node
             :disabled="item.disabled"
-            @check="item.change"
           />
           <el-cascader
             v-if="item.element === 'proAndCityAndArea'"
@@ -569,11 +542,71 @@
             style="width:220px"
             :disabled="item.disabled"
             :placeholder="`请选择${item.title}`"
-            :options="pcasData"
+            :options="pcaTextArr"
             collapse-tags
             collapse-tags-tooltip
-            :props="cascaderProps"
             @change="handleChange"
+          />
+        </el-form-item>
+        <div />
+        <el-form-item
+          v-for="item in formTimeAndNumber"
+          :key="item.key"
+          :label="item.title"
+          :rules="item.rules"
+          :prop="item.key"
+          class="mr10"
+        >
+          <el-time-picker
+            v-if="item.element === 'timerange'"
+            v-model="myformData[item.key]"
+            is-range
+            range-separator="至"
+            start-placeholder="开始时间"
+            style="width:200px"
+            end-placeholder="结束时间"
+          />
+          <el-date-picker
+            v-if="item.element === 'datetimerange'"
+            v-model="myformData[item.key]"
+            type="datetimerange"
+            range-separator="至"
+            start-placeholder="开始时间"
+            style="width:200px"
+            end-placeholder="结束时间"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            :disabled="item.disabled"
+          />
+          <el-date-picker
+            v-if="item.element === 'daterange'"
+            v-model="myformData[item.key]"
+            type="daterange"
+            range-separator="至"
+            start-placeholder="开始时间"
+            style="width:200px"
+            end-placeholder="结束时间"
+            value-format="YYYY-MM-DD"
+            :disabled="item.disabled"
+          />
+          <el-date-picker
+            v-if="item.element === 'date'"
+            v-model="myformData[item.key]"
+            :type="item.type"
+            range-separator="至"
+            start-placeholder="开始时间"
+            style="width:200px"
+            end-placeholder="结束时间"
+            value-format="YYYY-MM"
+            :disabled="item.disabled"
+          />
+          <el-input-number
+            v-if="item.element === 'number'"
+            v-model="myformData[item.key]" :disabled="item.disabled"
+            :min="0"
+            :max="item.max?item.max:100000000"
+            controls-position="right"
+            placeholder="1"
+            size="small"
           />
         </el-form-item>
         <div />
@@ -700,6 +733,20 @@
         </el-form-item>
         <slot name="append" />
       </el-form>
+      <div class="mt10 footer">
+        <el-button
+          type="primary" size="small"
+          @click="submitForm"
+        >
+          确定
+        </el-button>
+        <el-button
+          type="danger" size="small"
+          @click="closeDialog"
+        >
+          取消
+        </el-button>
+      </div>
     </div>
   </div>
 </template>
@@ -707,14 +754,7 @@
 <script setup>
 import { ref, getCurrentInstance, reactive, computed, watch } from 'vue'
 import { pcaTextArr } from 'element-china-area-data'
-import pcasData from './pcas-code.json'
 
-const cascaderProps = reactive({
-  checkStrictly: true,
-  value: "name",
-  label: "name",
-  children: "children"
-})
 const { proxy } = getCurrentInstance()
 const _props = defineProps({
   // 是否展示选择框
@@ -723,18 +763,18 @@ const _props = defineProps({
     default: false
   },
 
-  changeData: {
-    type: Boolean,
-    default: true
-  },
-
   useDialog: {
     type: Boolean,
     default: true
   },
+
   loading: {
     type: Boolean,
     default: false
+  },
+  confirmText: {
+    type: String,
+    default: '确定'
   },
 
   disabled: {
@@ -807,6 +847,11 @@ const _props = defineProps({
   defaultExpandedKeys: {
     type: Object,
     default: () => { return [] }
+  },
+
+  isChange: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -829,10 +874,6 @@ const showDialog = computed({
     //null
   }
 }) // 开启弹窗事件
-
-watch(() => _props.changeData, () => {
-  Object.assign(myformData.value, _props.formData)
-})
 
 const emitOpenDialog = (key) => _emits('emitOpenDialog', key) // 输入框按钮弹窗
 
@@ -895,30 +936,22 @@ const onCheckChange = (val) => {
 
 }
 
+watch(() => _props.isChange, () => {
+  console.log(_props.formData)
+  Object.assign(myformData.value, _props.formData)
+}, { immediate: true })
+
 const selectTreeCurrentChange = (val, node) => {
 
   // console.log(val, node)
 }
 
-const autoValid = async () => {
-  let sign = 0
-  await proxy.$refs.ruleFormRef.validate((valid, fields) => {
-    if (valid) {
-      sign = 1
-
-    } else {
-      sign = 0
-    }
-  })
-  return sign
-}
-
-const manualEmitData = () => {
-  return JSON.parse(JSON.stringify(myformData.value))
+const clearInput = (val, node) => {
+  myformData.value = {}
 }
 
 defineExpose({
-  updateDialogInput, successSubmit, autoValid, manualEmitData
+  updateDialogInput, successSubmit, clearInput
 })
 
 /**
@@ -991,16 +1024,19 @@ defineExpose({
   width: 120px;
   height: 120px;
 }
-:deep(.el-select){
-  width: 220px;
 
-}
 .resetUpload{
   position: absolute;
   top: 0;
   left: 0;
 }
-:deep(.el-link){
-  display: inline-block;
+
+:deep(.el-select){
+  width: 220px;
+}
+
+.footer{
+  display: flex;
+  justify-content: flex-end;
 }
 </style>

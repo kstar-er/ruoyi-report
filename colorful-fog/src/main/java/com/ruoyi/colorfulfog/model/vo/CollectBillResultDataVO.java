@@ -1,5 +1,7 @@
 package com.ruoyi.colorfulfog.model.vo;
 
+import com.ruoyi.colorfulfog.model.BillMain;
+import com.ruoyi.colorfulfog.model.BillResult;
 import com.ruoyi.colorfulfog.model.CollectResult;
 import com.ruoyi.colorfulfog.model.CollectResultMain;
 import lombok.AllArgsConstructor;

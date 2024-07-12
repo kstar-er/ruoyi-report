@@ -312,6 +312,12 @@
                 <version>${ruoyi-vue-plus.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>com.ruoyi</groupId>
+                <artifactId>ruoyi-mybatis</artifactId>
+                <version>${ruoyi-vue-plus.version}</version>
+            </dependency>
+
             <!-- OSS对象存储模块 -->
             <dependency>
                 <groupId>com.ruoyi</groupId>
@@ -347,7 +353,9 @@
         <module>ruoyi-extend</module>
         <module>ruoyi-oss</module>
         <module>ruoyi-sms</module>
+        <module>ruoyi-mybatis</module>
         <module>colorful-fog</module>
+
     </modules>
     <packaging>pom</packaging>
 

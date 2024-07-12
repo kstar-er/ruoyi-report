@@ -11,5 +11,6 @@ import java.util.List;
 @Data
 public class SchemeUserRelationSaveDto {
     String schemeCode;
+    String tableName;
     List<SchemeUserRelation> entityList;
 }

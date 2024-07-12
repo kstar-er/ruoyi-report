@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.DataRuleMapper">
+  <resultMap id="BaseResultMap" type="com.ruoyi.system.domain.DataRule">
+    <!--@mbg.generated-->
+    <!--@Table auth_data_rule-->
+    <result column="job_code" jdbcType="VARCHAR" property="jobId" />
+    <result column="rule_table" jdbcType="VARCHAR" property="ruleTable" />
+    <result column="group_code" jdbcType="VARCHAR" property="groupCode" />
+    <result column="rule_field" jdbcType="VARCHAR" property="ruleField" />
+    <result column="expression" jdbcType="VARCHAR" property="expression" />
+    <result column="expression_value" jdbcType="VARCHAR" property="expressionValue" />
+<!--    <result column="create_time" jdbcType="BIGINT" property="createTime" />-->
+<!--    <result column="update_time" jdbcType="BIGINT" property="updateTime" />-->
+<!--    <result column="update_user" jdbcType="INTEGER" property="updateBy" />-->
+<!--    <result column="create_user" jdbcType="INTEGER" property="createBy" />-->
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+     job_code, rule_table, group_code, rule_field, expression, expression_value
+  </sql>
+</mapper>

@@ -1,7 +1,7 @@
 <template>
   <div style="  display: inline-block;">
     <button
-      class="button" :class="type"
+      class="button" :class="type" type="button"
     >
       <slot />
     </button>
@@ -102,7 +102,7 @@ const props = defineProps({
   margin-left: -20px !important;
   margin-top: -120%;
   opacity: 0;
-  transition:all 1s;
+  transition:all 1.2s;
 }
 .button:active::after{
   padding: 0;

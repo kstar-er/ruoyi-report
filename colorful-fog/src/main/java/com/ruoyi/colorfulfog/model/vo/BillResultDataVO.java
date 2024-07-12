@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 @Builder
@@ -26,7 +27,7 @@ public class BillResultDataVO {
         keyMap1.put("billType",billMain.getBillType());
         keyMap1.put("billCode",billMain.getBillCode());
         keyMap1.put("costTerm",billMain.getCostTerm());
-        keyMap1.put("status",billMain.getStatus());
+        keyMap1.put("status",billMain.getStatus().getMsg());
         keyMap1.put("batchCode",billMain.getBatchCode());
         for (BillResult billResult : billResultList){
             keyMap1.put(billResult.getResultCode(),billResult.getValue());

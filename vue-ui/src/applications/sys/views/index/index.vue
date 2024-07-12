@@ -103,7 +103,6 @@ const quit = () => {
   justify-content: space-between;
   overflow: hidden;
   align-items: center;
-  box-shadow: 0 0 10px 0px #dddddd;
 }
 .header-text{
   display: flex;
@@ -122,6 +121,7 @@ const quit = () => {
   border-color: #e48585;
 }
 .handle{
+
   background: #fff;
   padding: 20px;
   height: 18rem;
@@ -133,6 +133,7 @@ const quit = () => {
   flex-direction: column;
   overflow: hidden;
   box-shadow: 0 0 10px 0px #dddddd;
+
   margin-top: 20px;
 }
 .content,.no-content{

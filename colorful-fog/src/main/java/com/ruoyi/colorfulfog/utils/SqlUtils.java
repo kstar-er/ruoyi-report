@@ -1,19 +1,23 @@
 package com.ruoyi.colorfulfog.utils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SqlUtils {
     /**
-     * 将传入的sql语句中带带有*号的单词替换为对应的去掉*号的单词的小写
+     * 将传入的sql语句中带带有[!]号的单词替换为对应的去掉[!]号的单词的小写
      * @param sql
      * @return
      */
     public static String replaceSqlCondition(String sql){
-        // 将传入的sql语句中带带有号的单词替换为对应的去掉*号的单词的小写
+        // 将传入的sql语句中带带有号的单词替换为对应的去掉[!]号的单词的小写
         String[] sqlArray = sql.split(" ");
         for(int i = 0; i < sqlArray.length; i++) {
             if (sqlArray[i].contains("[!]")) {
                 sqlArray[i] = sqlArray[i].replace("[!]", "");
+            }
+            if (sqlArray[i].equals("NotLike")) {
+                sqlArray[i] = sqlArray[i].replace("NotLike", "not like");
             }
         }
         String result = "";

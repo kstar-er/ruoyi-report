@@ -11,35 +11,6 @@ export default {
 </script>
 
 <script setup>
-import { watch, ref } from 'vue'
-import Watermark from 'watermark-plus'
-import { useRoute } from 'vue-router'
-const route = useRoute()
-const watermark = ref(null)
-watch(() => route.path, (newPath, oldPath) => {
-  setTimeout(() => {
-    if (route.path === '/login') {
-      if (watermark.value) watermark.value.destroy()
-    } else if (route.path.indexOf('print') !== -1){
-      if (watermark.value) watermark.value.destroy()
-    } else {
-      let userInfo = JSON.parse(sessionStorage.getItem('userInfo')).user
-      if (!userInfo) return
-      if (watermark.value) watermark.value.destroy()
-      watermark.value = new Watermark({
-      // 传参
-        content: ` ${userInfo?.nickName}`,
-        fontSize: '16',
-        color: 'grey',
-        alpha: 0.07,
-        width: '20',
-        height: '70'
-      })
-      watermark.value.create()
-    }
-  }, 1000)
-}, { immediate: true })
-
 const debounce = (fn, delay) => {
   let timer = null
   return function() {
@@ -98,7 +69,7 @@ body {
 
 * {
   scrollbar-color: #e5e5e5 #f7f7f9; /* 滑块颜色  滚动条背景颜色 */
-  scrollbar-width: none; /* 滚动条宽度有三种：thin、auto、none */
+  scrollbar-width: thin; /* 滚动条宽度有三种：thin、auto、none */
   font-family: 'Microsoft YaHei', '微软雅黑', Arial, sans-serif;
 }
 

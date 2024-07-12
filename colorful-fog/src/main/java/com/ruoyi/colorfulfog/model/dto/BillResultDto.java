@@ -2,6 +2,7 @@ package com.ruoyi.colorfulfog.model.dto;
 
 import lombok.Getter;
 
+import java.util.List;
 import java.util.Map;
 
 @Getter
@@ -11,17 +12,24 @@ public class BillResultDto {
      * 查询自定义字段的数据
      */
     Map<String,String> fieldSelectList;
+
+
     /**
      * 其他的作为主表的固定字段，直接查询
      */
-    String status;
+    String belongArchiveName;
     String schemeCode;
+    String belongArchiveCode;
+    String status;
+    String collectSchemeCode;
     String costTerm;
     String billType;
     String batchCode;
+    String billCode;
     String updateUserName;
     Long createStartTime;
     Long createEndTime;
     Long updateStartTime;
     Long updateEndTime;
+
 }

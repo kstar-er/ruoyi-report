@@ -1,40 +1,59 @@
 package com.ruoyi.colorfulfog.model;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class BaseClass {
+
     @TableId(value = "id", type = IdType.AUTO)
-    private Integer id;
+    private Long id;
+    /**
+     * 搜索值
+     */
+    @JsonIgnore
+    @TableField(exist = false)
+    private String searchValue;
+
+    /**
+     * 创建者
+     */
+    @TableField(fill = FieldFill.INSERT)
+    private String createBy;
 
     /**
      * 创建时间
      */
-    @TableField(value = "create_time", fill = FieldFill.INSERT)
+    @TableField(fill = FieldFill.INSERT)
     private Long createTime;
 
     /**
-     * 更新新时间
+     * 更新者
      */
-    @TableField(value = "update_time", fill = FieldFill.INSERT_UPDATE)
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private String updateBy;
+
+    /**
+     * 更新时间
+     */
+    @TableField(fill = FieldFill.INSERT_UPDATE)
     private Long updateTime;
 
     /**
-     * 更新者id
+     * 请求参数
      */
-    @TableField(value = "update_user", fill = FieldFill.INSERT_UPDATE)
-    private Long updateUser;
-
-    /**
-     * 创建者id
-     */
-    @TableField(value = "create_user", fill = FieldFill.INSERT)
-    private Long createUser;
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @TableField(exist = false)
+    private Map<String, Object> params = new HashMap<>();
 
     /**
      * 1删除0有效

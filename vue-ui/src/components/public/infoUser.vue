@@ -30,7 +30,7 @@ onMounted(() => {
   }
   window.$eventBus.$on('changeTheLight', (val) => {
     if (!val) {
-      bgColor.value = '#011f3c'
+      bgColor.value = '#126f9e'
       textColor.value = '#fff'
     } else {
       bgColor.value = '#fff'

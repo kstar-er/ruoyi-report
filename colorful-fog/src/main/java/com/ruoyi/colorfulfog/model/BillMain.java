@@ -1,7 +1,11 @@
 package com.ruoyi.colorfulfog.model;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.ruoyi.colorfulfog.constant.enums.BillCheckStatusEnum;
+import com.ruoyi.common.core.domain.BaseEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,7 +17,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @TableName(value = "cwu_bill_main")
-public class  BillMain extends BaseClass{
+public class  BillMain extends BaseClass {
     /**
      * 账单编码
      */
@@ -24,7 +28,7 @@ public class  BillMain extends BaseClass{
      * 对账状态
      */
     @TableField(value = "status")
-    private String status;
+    private BillCheckStatusEnum status;
 
     /**
      * 所属计划id

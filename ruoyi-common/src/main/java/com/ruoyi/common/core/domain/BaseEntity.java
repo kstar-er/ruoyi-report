@@ -1,7 +1,9 @@
 package com.ruoyi.common.core.domain;
 
 import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
@@ -39,7 +41,7 @@ public class BaseEntity implements Serializable {
      * 创建时间
      */
     @TableField(fill = FieldFill.INSERT)
-    private Date createTime;
+    private Long createTime;
 
     /**
      * 更新者
@@ -51,7 +53,7 @@ public class BaseEntity implements Serializable {
      * 更新时间
      */
     @TableField(fill = FieldFill.INSERT_UPDATE)
-    private Date updateTime;
+    private Long updateTime;
 
     /**
      * 请求参数

@@ -7,7 +7,7 @@ const role = {
         title: "角色名称",
         dataKey: "roleName",
         key: 'roleName',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -15,7 +15,7 @@ const role = {
         title: "权限标识",
         dataKey: "roleKey",
         key: 'roleKey',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -23,7 +23,7 @@ const role = {
         title: "显示顺序",
         dataKey: "roleSort",
         key: 'roleSort',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -31,7 +31,7 @@ const role = {
         title: "状态",
         dataKey: "status",
         key: 'status',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -39,7 +39,7 @@ const role = {
         title: "数据权限范围",
         dataKey: "dataScope",
         key: 'dataScope',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -47,7 +47,7 @@ const role = {
         title: "备注",
         dataKey: "remark",
         key: 'remark',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -55,7 +55,7 @@ const role = {
         title: "创建者",
         dataKey: "createBy",
         key: 'createBy',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -63,7 +63,7 @@ const role = {
         title: "创建时间",
         dataKey: "createTime",
         key: 'createTime',
-        width: 200,
+        width: 300,
         type: 'date',
         isShow: true,
         isFixed: false
@@ -71,7 +71,7 @@ const role = {
         title: "更新者",
         dataKey: "updateBy",
         key: 'updateBy',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -79,7 +79,7 @@ const role = {
         title: "更新时间",
         dataKey: "updateTime",
         key: 'updateTime',
-        width: 200,
+        width: 300,
         type: 'date',
         isShow: true,
         isFixed: false
@@ -90,7 +90,7 @@ const role = {
         title: "角色名称",
         dataKey: "roleName",
         key: 'roleName',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -98,7 +98,7 @@ const role = {
         title: "权限标识",
         dataKey: "roleKey",
         key: 'roleKey',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -106,7 +106,7 @@ const role = {
         title: "显示顺序",
         dataKey: "roleSort",
         key: 'roleSort',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -114,7 +114,7 @@ const role = {
         title: "状态",
         dataKey: "status",
         key: 'status',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -122,7 +122,7 @@ const role = {
         title: "数据权限范围",
         dataKey: "dataScope",
         key: 'dataScope',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -130,7 +130,7 @@ const role = {
         title: "备注",
         dataKey: "remark",
         key: 'remark',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -138,7 +138,7 @@ const role = {
         title: "创建者",
         dataKey: "createBy",
         key: 'createBy',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -146,7 +146,7 @@ const role = {
         title: "创建时间",
         dataKey: "createTime",
         key: 'createTime',
-        width: 200,
+        width: 300,
         type: 'date',
         isShow: true,
         isFixed: false
@@ -154,7 +154,7 @@ const role = {
         title: "更新者",
         dataKey: "updateBy",
         key: 'updateBy',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -162,7 +162,7 @@ const role = {
         title: "更新时间",
         dataKey: "updateTime",
         key: 'updateTime',
-        width: 200,
+        width: 300,
         type: 'date',
         isShow: true,
         isFixed: false

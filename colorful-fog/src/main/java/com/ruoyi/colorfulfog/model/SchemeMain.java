@@ -2,6 +2,8 @@ package com.ruoyi.colorfulfog.model;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.ruoyi.colorfulfog.constant.enums.ExecutionTimeUnit;
+import com.ruoyi.common.core.domain.BaseEntity;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -69,7 +71,7 @@ public class SchemeMain extends BaseClass {
      * 执行时间单位，每天执行，还是每月执行一次
      */
     @TableField(value = "execution_unit")
-    private ExecutionUnit executionUnit;
+    private ExecutionTimeUnit executionUnit;
     /**
      * 每日执行的话是0-24，每月执行的话是0-31
      */
@@ -92,14 +94,14 @@ public class SchemeMain extends BaseClass {
     @ApiModelProperty(value = "时间字段")
     private String timeField;
 
+    @TableField(value = "time_field_result_code")
+    @ApiModelProperty(value = "时间字段对应编码")
+    private String timeFieldResultCode;
+
     @TableField(value = "time_field_name")
     @ApiModelProperty(value = "时间字段名称")
     private String timeFieldName;
 
 
-    public enum ExecutionUnit {
-        DAILY,
-        MONTHLY;
-    }
 
 }

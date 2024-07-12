@@ -3,6 +3,7 @@ package com.ruoyi.colorfulfog.model.table;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.ruoyi.colorfulfog.model.BaseClass;
+import com.ruoyi.common.core.domain.BaseEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

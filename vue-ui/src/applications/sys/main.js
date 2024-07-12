@@ -11,9 +11,9 @@ import xButton from '@/components/common/xButton/index.js'
 
 useEventBus() // 使用事件总线
 if (process.env.VUE_APP_TITLE === 'dev'){
-  const { config: { ip, devServer: { https, port } } } = require('@/../models')
-  https ? document.querySelector('link[rel="icon"]').setAttribute('href', `https://${ip}:${port}/jxwl.ico`) :
-    document.querySelector('link[rel="icon"]').setAttribute('href', `http://${ip}:${port}/test.ico`)
+  const { config: { devServer: { https } } } = require('@/../models')
+  https ? document.querySelector('link[rel="icon"]').setAttribute('href', 'https://localhost:9999/test.ico') :
+    document.querySelector('link[rel="icon"]').setAttribute('href', 'http://localhost:9999/test.ico')
 }
 
 const app = createApp(App)

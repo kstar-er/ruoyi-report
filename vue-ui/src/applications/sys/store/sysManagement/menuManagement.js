@@ -7,7 +7,7 @@ const menu = {
         title: "文案标识",
         dataKey: "menuName",
         key: 'menuName',
-        width: 300,
+        width: 250,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -23,7 +23,7 @@ const menu = {
         title: "权限类型",
         dataKey: "menuType",
         key: 'menuType',
-        width: 200,
+        width: 150,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -31,7 +31,7 @@ const menu = {
         title: "路由地址",
         dataKey: "path",
         key: 'path',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -39,7 +39,7 @@ const menu = {
         title: "组件地址",
         dataKey: "component",
         key: 'component',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -71,7 +71,7 @@ const menu = {
         title: "备注",
         dataKey: "remark",
         key: 'remark',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -87,7 +87,7 @@ const menu = {
         title: "创建时间",
         dataKey: "createTime",
         key: 'createTime',
-        width: 200,
+        width: 300,
         type: 'date',
         isShow: true,
         isFixed: false
@@ -103,7 +103,7 @@ const menu = {
         title: "更新时间",
         dataKey: "updateTime",
         key: 'updateTime',
-        width: 200,
+        width: 300,
         type: 'date',
         isShow: true,
         isFixed: false
@@ -114,7 +114,7 @@ const menu = {
         title: "文案标识",
         dataKey: "menuName",
         key: 'menuName',
-        width: 300,
+        width: 250,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -130,7 +130,7 @@ const menu = {
         title: "权限类型",
         dataKey: "menuType",
         key: 'menuType',
-        width: 200,
+        width: 150,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -138,7 +138,7 @@ const menu = {
         title: "路由地址",
         dataKey: "path",
         key: 'path',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -146,7 +146,7 @@ const menu = {
         title: "组件地址",
         dataKey: "component",
         key: 'component',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -178,7 +178,7 @@ const menu = {
         title: "备注",
         dataKey: "remark",
         key: 'remark',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -194,7 +194,7 @@ const menu = {
         title: "创建时间",
         dataKey: "createTime",
         key: 'createTime',
-        width: 200,
+        width: 300,
         type: 'date',
         isShow: true,
         isFixed: false
@@ -210,7 +210,7 @@ const menu = {
         title: "更新时间",
         dataKey: "updateTime",
         key: 'updateTime',
-        width: 200,
+        width: 300,
         type: 'date',
         isShow: true,
         isFixed: false

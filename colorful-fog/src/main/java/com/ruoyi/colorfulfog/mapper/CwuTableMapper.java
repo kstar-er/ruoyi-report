@@ -7,6 +7,8 @@ import com.ruoyi.colorfulfog.model.CwuTable;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 @Mapper
 public interface CwuTableMapper extends BaseMapper<CwuTable> {
     Page<CwuTable> selectPageDbTableList(@Param("page") Page<CwuTable> page, @Param("cwuTable") CwuTable cwuTable);

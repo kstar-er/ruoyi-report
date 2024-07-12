@@ -5,21 +5,13 @@ import userManagement from './sysManagement/userManagement'
 import role from './sysManagement/roleManagement'
 import depart from './sysManagement/departmentManagement'
 import menu from './sysManagement/menuManagement'
-import shoper from './fileManager/shoper'
-import warehouse from './fileManager/warehouse'
-import product from './fileManager/product'
-import productType from './fileManager/productType'
-import stock from './fileManager/stock'
-import position from './fileManager/position'
-import flow from './fileManager/flow'
-import inOrder from './fileManager/in'
-import out from './fileManager/out'
-import allocation from './fileManager/allocation'
-import worker from './fileManager/worker'
-import checkMissions from './fileManager/checkMissions'
-import checkWorks from './fileManager/checkWorks'
-import sheet from './fileManager/sheet'
-import batch from './fileManager/batch'
+
+import structure from './financial/structure'
+import relationship from './financial/relationship'
+import programme from './financial/programme'
+import summaryPlan from './financial/summaryPlan'
+
+import classificationError from './financial/classificationError'
 export default createStore({
   state: {
     isLoadRouter: false,
@@ -37,20 +29,14 @@ export default createStore({
   },
   modules: {
     userManagement, role, depart, menu,
-    shoper, warehouse, product, productType,
-    stock, position, flow,
-    allocation, out, inOrder,
-    worker, sheet, checkMissions, checkWorks, batch
-
+    structure, relationship, programme, summaryPlan, classificationError
   },
   plugins: [createPersistedstate({
     storage: window.localStorage,
     key: 'client-header-store',
     paths: [
-      'userManagement', 'role', 'depart', 'menu',
-      'shoper', 'warehouse', 'product', 'productType',
-      'stock', 'position', 'flow',
-      'allocation', 'out', 'inOrder', 'worker', 'sheet', 'checkMissions', 'checkWorks', 'batch'
+      'userManagement', 'role',
+      'structure', 'relationship', 'summaryPlan', 'classificationError'
     ]
   })]
 })

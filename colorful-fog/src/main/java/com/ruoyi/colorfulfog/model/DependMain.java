@@ -1,12 +1,9 @@
 package com.ruoyi.colorfulfog.model;
 
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import com.ruoyi.colorfulfog.constant.enums.DependTypeEnum;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.ruoyi.common.core.domain.BaseEntity;
+import lombok.*;
 
 
 @Data
@@ -14,11 +11,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @TableName(value = "cwu_depend_main")
-public class DependMain  extends BaseClass{
+public class DependMain  extends BaseClass {
     @TableField(value = "depend_code")
     private String dependCode;
 
-    @TableField(value = "name")
+    @TableField(value = "name", condition = SqlCondition.LIKE)
     private String name;
 
     /**

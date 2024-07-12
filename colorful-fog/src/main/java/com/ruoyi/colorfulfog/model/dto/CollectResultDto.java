@@ -3,6 +3,9 @@ package com.ruoyi.colorfulfog.model.dto;
 import lombok.Builder;
 import lombok.Data;
 
+/**
+ * 汇总计划向下查询源数据dto
+ */
 @Data
 @Builder
 public class CollectResultDto {
@@ -12,4 +15,7 @@ public class CollectResultDto {
     String schemeCode;
     String resultCode;
     String timeFieldCode;
+    String belongArchiveCode;
+    String costTerm;
+    String collectSchemeCode;
 }

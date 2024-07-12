@@ -34,8 +34,7 @@ class PublicDataSource {
     deleteUri = '/', // 删除接口地址
     selectOneUri = '/', // 获取单个数据地址
     pageSize = 20, // 页大小
-    tableHeader = [], // 不读取store时的表头
-    listMethod = 'post' // 数据请求的方法 post 或 get
+    tableHeader = []// 不读取store时的表头
   } = {}){
     this.modules = modules
     this.selectUri = selectUri
@@ -48,35 +47,13 @@ class PublicDataSource {
     this.tableData = []
     this.tableHeader = tableHeader
     this.selections = []
-    this.listMethod = listMethod
   }
   async initData(context = this, tableRef){
-    if (context.listMethod !== 'post') {
-      context.initDataByGet(context, tableRef)
-      return
-    }
     let { data: { data, code, message } } = await pbRequest.post(`${context.selectUri}?pageNum=${context.currentPage}&pageSize=${context.pageSize}`, context.searchData)
     if (code !== 200) return
     context.total = data.total
     context.tableData.length = 0
     context.tableData.push(...data.rows)
-    tableRef?.clearSelection()
-  }
-
-  async initDataByGet(context = this, tableRef){
-    let url = `${context.selectUri}?pageNum=${context.currentPage}&pageSize=${context.pageSize}`
-    let searchKey = Object.keys(context.searchData)
-    let searchValue = ``
-    searchKey.forEach(item => {
-      searchValue += `&${item}=${context.searchData[item]}`
-    })
-    url += searchValue
-    let { data: { data, code, message, total, rows } } = await pbRequest.get(url)
-    if (code !== 200) return
-    context.total = total ? total : data?.total
-    context.tableData.length = 0
-    rows ? context.tableData.push(...rows) : context.tableData.push(...data.rows)
-
     tableRef?.clearSelection()
   }
   currentPageChange(page, context = this, tableRef){

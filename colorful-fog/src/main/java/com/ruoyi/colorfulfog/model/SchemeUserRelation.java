@@ -1,7 +1,10 @@
 package com.ruoyi.colorfulfog.model;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.ruoyi.common.core.domain.BaseEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,7 +15,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @TableName(value = "cwu_scheme_user_relation")
-public class SchemeUserRelation extends BaseClass {
+public class    SchemeUserRelation extends BaseClass {
 
     @TableField(value = "user_id")
     private Integer userId;
@@ -33,4 +36,7 @@ public class SchemeUserRelation extends BaseClass {
      */
     @TableField(value = "archive_user_name")
     private String archiveUserName;
+
+    @TableField(value = "table_name")
+    private String tableName;
 }

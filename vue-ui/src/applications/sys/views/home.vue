@@ -3,7 +3,7 @@
     <div class="header">
       <infoUser
         :user-color="'#666'" show-change-collapse
-        @change-collapse="changeCollapse"
+        @changeCollapse="changeCollapse"
       />
     </div>
     <div class="main-container">
@@ -91,8 +91,6 @@ const changeCollapse = (val) => {
 }
 
 .scroll{
-  width: 100%;
-  overflow-x: hidden;
   height: calc(100vh - 40px - 30px - 34px);
 }
 

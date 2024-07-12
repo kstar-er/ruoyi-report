@@ -7,15 +7,15 @@ const depart = {
         title: "部门名称",
         dataKey: "deptName",
         key: 'deptName',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
-        isFixed: true
+        isFixed: false
       }, {
         title: "部门负责人",
         dataKey: "leader",
         key: 'leader',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -23,7 +23,7 @@ const depart = {
         title: "负责人联系电话",
         dataKey: "phone",
         key: 'phone',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -31,7 +31,7 @@ const depart = {
         title: "邮箱",
         dataKey: "email",
         key: 'email',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -39,7 +39,7 @@ const depart = {
         title: "状态",
         dataKey: "status",
         key: 'status',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -47,7 +47,7 @@ const depart = {
         title: "创建者",
         dataKey: "createBy",
         key: 'createBy',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -55,7 +55,7 @@ const depart = {
         title: "创建时间",
         dataKey: "createTime",
         key: 'createTime',
-        width: 200,
+        width: 300,
         type: 'date',
         isShow: true,
         isFixed: false
@@ -63,7 +63,7 @@ const depart = {
         title: "更新者",
         dataKey: "updateBy",
         key: 'updateBy',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -71,7 +71,7 @@ const depart = {
         title: "更新时间",
         dataKey: "updateTime",
         key: 'updateTime',
-        width: 200,
+        width: 300,
         type: 'date',
         isShow: true,
         isFixed: false
@@ -82,15 +82,15 @@ const depart = {
         title: "部门名称",
         dataKey: "deptName",
         key: 'deptName',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
-        isFixed: true
+        isFixed: false
       }, {
         title: "部门负责人",
         dataKey: "leader",
         key: 'leader',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -98,7 +98,7 @@ const depart = {
         title: "负责人联系电话",
         dataKey: "phone",
         key: 'phone',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -106,7 +106,7 @@ const depart = {
         title: "邮箱",
         dataKey: "email",
         key: 'email',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -114,7 +114,7 @@ const depart = {
         title: "状态",
         dataKey: "status",
         key: 'status',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -122,7 +122,7 @@ const depart = {
         title: "创建者",
         dataKey: "createBy",
         key: 'createBy',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -130,7 +130,7 @@ const depart = {
         title: "创建时间",
         dataKey: "createTime",
         key: 'createTime',
-        width: 200,
+        width: 300,
         type: 'date',
         isShow: true,
         isFixed: false
@@ -138,7 +138,7 @@ const depart = {
         title: "更新者",
         dataKey: "updateBy",
         key: 'updateBy',
-        width: 200,
+        width: 300,
         type: 'text',
         isShow: true,
         isFixed: false
@@ -146,7 +146,7 @@ const depart = {
         title: "更新时间",
         dataKey: "updateTime",
         key: 'updateTime',
-        width: 200,
+        width: 300,
         type: 'date',
         isShow: true,
         isFixed: false

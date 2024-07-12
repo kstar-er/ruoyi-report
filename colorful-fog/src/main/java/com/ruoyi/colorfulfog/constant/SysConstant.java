@@ -4,14 +4,7 @@ package com.ruoyi.colorfulfog.constant;
  * 存放系统常量。
  */
 public interface SysConstant {
-    /**
-     * tms OpenApi相关
-     */
-    interface TMSOpenApi {
-        String APP_ID = "wms";
-        String APP_SECRET = "1kjfiwlkjcfkje34jkmxc";
-        String TMS_OPEN_API_TOKEN_CACHE_NAME = "TMS_OPEN_API_TOKEN_CACHE_NAME";
-    }
+
 
     /**
      * 存放缓存的名字
@@ -51,6 +44,7 @@ public interface SysConstant {
     }
     interface SPECIAL_VALUE{
         String OTHER = "其他！";
+        String VALUE_EQUAL_KEY = "$key";
     }
 
 

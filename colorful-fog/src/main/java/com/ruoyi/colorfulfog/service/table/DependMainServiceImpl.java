@@ -2,18 +2,19 @@ package com.ruoyi.colorfulfog.service.table;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.github.pagehelper.PageInfo;
 import com.ruoyi.colorfulfog.constant.SysConstant;
-import com.ruoyi.colorfulfog.mapper.DependMainMapper;
-import com.ruoyi.colorfulfog.model.DependMain;
 import com.ruoyi.colorfulfog.model.dto.DependMainDto;
-import com.ruoyi.colorfulfog.service.table.interfaces.DependMainService;
+import com.github.pagehelper.PageInfo;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.ruoyi.colorfulfog.mapper.DependMainMapper;
+import com.ruoyi.colorfulfog.model.DependMain;
+import com.ruoyi.colorfulfog.service.table.interfaces.DependMainService;
 
 @Service
 public class DependMainServiceImpl extends ServiceImpl<DependMainMapper, DependMain> implements DependMainService {

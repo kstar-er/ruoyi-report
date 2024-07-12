@@ -10,6 +10,7 @@ import { ref } from 'vue'
  * 加载动画
  */
 let loading = ref(false)
+let isError = ref(false)
 
 /**
  * 获取当前时间
@@ -28,13 +29,15 @@ const getTime = () => {
 /**
  * 创建请求实例
  */
+
 const pbRequest = axios.create({
 
   // baseURL: process.env.VUE_APP_TITLE !== 'pro' ? 'http://192.168.28.128:8080' : 'https://manage.haoxindian.com:8080',
 
-  // baseURL: process.env.VUE_APP_TITLE !== 'pro' ? 'http://192.168.28.134:9999' : 'https://logistics.jiaxianwuliu.com:9998',
+  // baseURL: process.env.VUE_APP_TITLE === 'pro' ? 'http://192.168.28.118:8080' : 'https://logistics.jiaxianwuliu.com:9998',
 
-  baseURL: process.env.VUE_APP_TITLE !== 'pro' ? 'http://192.168.28.134:8884' : 'http://8.138.143.21:8884', // 对外服务器
+  baseURL: process.env.VUE_APP_TITLE !== 'pro' ? 'http://192.168.28.118:8834' : 'http://8.138.143.21:9999', // 对外服务器
+
   headers: {
     "Content-Type": "application/json"
   }
@@ -47,6 +50,8 @@ pbRequest.interceptors.request.use(
 
   // 对请求之前需要做的操作
   config => {
+
+    // config.url = config.url.replace('/colorful-fog', '')
     loading.value = true
     console.log('---------请求拦截---------' + config.url + `  请求开始时间：${ getTime() }`)
     config.requestStartTime = Date.parse(new Date())
@@ -127,6 +132,7 @@ pbRequest.interceptors.response.use(
 
   // 响应错误处理
   error => {
+    if (isError.value) return
     loading.value = false
     let alertText = '出现了预期之外的错误'
     if (error.code === 'ERR_NETWORK'){
@@ -141,10 +147,13 @@ pbRequest.interceptors.response.use(
       confirmButtonText: '我知道了',
       dangerouslyUseHTMLString: true
     }).then(res => {
+      isError.value = false
+
       //null
     }).catch(() => {
       //null
     })
+    isError.value = true
     return { data: { code: 'ERR_BAD_REQUEST', msg: 'Error', data: null } }
   }
 )

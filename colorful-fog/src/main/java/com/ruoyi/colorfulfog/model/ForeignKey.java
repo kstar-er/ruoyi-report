@@ -20,10 +20,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @TableName(value = "cwu_foreign_key")
-public class ForeignKey {
-    @TableId(value = "id", type = IdType.INPUT)
-    @ApiModelProperty(value="")
-    private Integer id;
+public class ForeignKey extends BaseClass {
 
     /**
      * 表名
@@ -37,7 +34,7 @@ public class ForeignKey {
      */
     @TableField(value = "table_id")
     @ApiModelProperty(value="对应表的id")
-    private Integer tableId;
+    private Long tableId;
 
     /**
      * 外键
@@ -63,54 +60,6 @@ public class ForeignKey {
      */
     @TableField(value = "foreign_table_id")
     @ApiModelProperty(value="外键关联表的id")
-    private Integer foreignTableId;
+    private Long foreignTableId;
 
-    /**
-     * 创建时间
-     */
-    @TableField(value = "create_time")
-    @ApiModelProperty(value="创建时间")
-    private Long createTime;
-
-    /**
-     * 更新时间
-     */
-    @TableField(value = "update_time")
-    @ApiModelProperty(value="更新时间")
-    private Long updateTime;
-
-    /**
-     * 更新者id
-     */
-    @TableField(value = "update_user")
-    @ApiModelProperty(value="更新者id")
-    private Integer updateUser;
-
-    /**
-     * 创建者id
-     */
-    @TableField(value = "create_user")
-    @ApiModelProperty(value="创建者id")
-    private Integer createUser;
-
-    /**
-     * 创建的组织id
-     */
-    @TableField(value = "create_org")
-    @ApiModelProperty(value="创建的组织id")
-    private Integer createOrg;
-
-    /**
-     * 更新的组织id
-     */
-    @TableField(value = "update_org")
-    @ApiModelProperty(value="更新的组织id")
-    private Integer updateOrg;
-
-    /**
-     * 1删除0有效
-     */
-    @TableField(value = "is_delete")
-    @ApiModelProperty(value="1删除0有效")
-    private Integer isDelete;
 }

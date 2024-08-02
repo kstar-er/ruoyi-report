@@ -84,6 +84,12 @@ public class ErrReasonServiceImpl extends ServiceImpl<ErrReasonMapper, ErrReason
             return false;
         }
     }
+    @Override
+    public List<ErrReason> listErrReasonByBillCode(List<String> billCodeList){
+        return list(new LambdaQueryWrapper<ErrReason>()
+                .in(ErrReason::getBillCode,billCodeList)
+                .eq(ErrReason::getDealFlag,0));
+    }
 
     @Transactional
     @Override
@@ -99,7 +105,7 @@ public class ErrReasonServiceImpl extends ServiceImpl<ErrReasonMapper, ErrReason
         billDataMap.forEach((schemeCode,billDataList1)->{
            exportExcelVOList.add(ExportExcelVO.builder()
                            .schemeName(errReasonMap.get(schemeCode).get(0).getSchemeName())
-                           .billResultVO(billMainService.buildBillResultVO(billDataList1, SelectTypeEnum.EXPORT))
+                           .billResultVO(billMainService.buildBillResultVO(billDataList1, SelectTypeEnum.CALC))
                    .build());
         });
         exportErrReason.setExportExcelVOList(exportExcelVOList);

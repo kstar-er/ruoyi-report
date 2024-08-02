@@ -14,10 +14,7 @@ import com.ruoyi.colorfulfog.service.table.interfaces.DependMainService;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -44,8 +41,12 @@ public class DependDataServiceImpl extends ServiceImpl<DependDataMapper, DependD
     }
     @Override
     public void addBatch(List<DependData> dependDataList){
-
-        List<String> keyList = dependDataList.stream().map(DependData::getKey).collect(Collectors.toList());
+        for (DependData dependData : dependDataList) {
+            if (dependData.getKey()==null){
+                dependData.setKey(dependData.getRangeStart() + "," + dependData.getRangeEnd());
+            }
+        }
+        List<String> keyList = dependDataList.stream().map(DependData::getKey).filter(Objects::nonNull).collect(Collectors.toList());
         // 获取keyList中重复的Key值
         List<String> duplicateKeys = keyList.stream().filter(key -> Collections.frequency(keyList, key) > 1).collect(Collectors.toList());
         // 判断是否存在重复的key值

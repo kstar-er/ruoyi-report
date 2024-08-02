@@ -4,8 +4,10 @@ import cn.hutool.core.util.ObjectUtil;
 import com.ruoyi.colorfulfog.constant.enums.BillCheckStatusEnum;
 import com.ruoyi.colorfulfog.config.exception.GlobalException;
 import com.ruoyi.colorfulfog.constant.enums.ErrorCodeEnum;
+import com.ruoyi.colorfulfog.constant.enums.IdTypeEnum;
 import com.ruoyi.colorfulfog.constant.enums.SelectTypeEnum;
 import com.ruoyi.colorfulfog.model.*;
+import com.ruoyi.colorfulfog.model.dto.AddDataManualDto;
 import com.ruoyi.colorfulfog.model.dto.BillResultDto;
 import com.ruoyi.colorfulfog.model.dto.BillResultFlashDto;
 import com.ruoyi.colorfulfog.model.dto.repo.DataSourceDTO;
@@ -14,13 +16,16 @@ import com.ruoyi.colorfulfog.model.mongodb.BaseData;
 import com.ruoyi.colorfulfog.model.mongodb.BillData;
 import com.ruoyi.colorfulfog.model.mongodb.UpdateRecord;
 import com.ruoyi.colorfulfog.model.vo.BillResultVO;
+import com.ruoyi.colorfulfog.model.vo.ExportTemplateVO;
 import com.ruoyi.colorfulfog.model.vo.ResultNameCodeVO;
+import com.ruoyi.colorfulfog.service.busniess.interfaces.CodeService;
 import com.ruoyi.colorfulfog.service.table.interfaces.*;
 import com.github.pagehelper.PageInfo;
 import com.ruoyi.colorfulfog.utils.TimeUtils;
 import com.ruoyi.common.helper.LoginHelper;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.BulkOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -58,6 +63,8 @@ public class BillMainServiceImpl extends ServiceImpl<BillMainMapper, BillMain> i
     @Autowired
     MongoTemplate mongoTemplate;
 
+    @Autowired
+    CodeService codeService;
     @Resource
     CollectResultMainService collectResultMainService;
 
@@ -88,6 +95,7 @@ public class BillMainServiceImpl extends ServiceImpl<BillMainMapper, BillMain> i
             }
         }
         long count = mongoTemplate.count(query,BillData.class);
+        query.with(Sort.by(Sort.Direction.DESC, "id"));
         query.limit(pageSize).skip((long) (currentPage - 1) *pageSize);
         List<BillData> billMainList = mongoTemplate.find(query,BillData.class);
         BillResultVO billResultVO =  buildBillResultVO(billMainList,SelectTypeEnum.CALC);
@@ -353,6 +361,53 @@ public class BillMainServiceImpl extends ServiceImpl<BillMainMapper, BillMain> i
             schemeMainService.flashByCollectCode(BillResultFlashDto.builder().collectResultCode(code).build());
         }
         return updateCount+"条数据设为无效";
+    }
+
+    @Override
+    public void addDataManual(List<AddDataManualDto> addDataManualDtoList){
+        checkManualData(addDataManualDtoList);
+        String batchCode = codeService.getCode(IdTypeEnum.RESULT_BATCH_CODE);
+        List<String> billCode = codeService.getCode(IdTypeEnum.COST_BILL,addDataManualDtoList.size());
+        Integer manualFlag = 1;
+        String schemeCode = addDataManualDtoList.get(0).getSchemeCode();
+        SchemeMain schemeMain = schemeMainService.getSchemeMainByCode(schemeCode);
+        List<BillData> billDataList = new ArrayList<>();
+        int i = 0;
+        for (AddDataManualDto addDataManualDto : addDataManualDtoList) {
+            BillData billData = new BillData();
+            billData.setSchemeCode(schemeCode);
+            billData.setBatchCode(batchCode);
+            billData.setBillCode(billCode.get(i++));
+            billData.setManualFlag(manualFlag);
+            billData.setStatus(BillCheckStatusEnum.NORMAL);
+            billData.setTagTime((Long) addDataManualDto.getData().get(schemeMain.getTimeFieldResultCode()));
+            billData.setBillType(schemeMain.getBillType());
+            billData.setBelongArchiveCode(addDataManualDto.getBelongArchiveCode());
+            billData.setBelongArchiveName(addDataManualDto.getBelongArchiveName());
+            billData.setCollectResultCode(addDataManualDto.getCollectResultCode());
+            billData.setData(addDataManualDto.getData());
+            billDataList.add(billData);
+        }
+        mongoTemplate.insertAll(billDataList);
+    }
+    private void checkManualData(List<AddDataManualDto> addDataManualDtoList){
+        if (addDataManualDtoList.size()<1){
+            throw new GlobalException("请至少导入一条数据");
+        }
+        List<ExportTemplateVO> exportTemplateVOList = schemeDetailService.exportTemplate(addDataManualDtoList.get(0).getSchemeCode());
+        exportTemplateVOList = exportTemplateVOList.stream().filter(s->s.getIsRequired()!=null&& s.getIsRequired()).collect(Collectors.toList());
+        List<String> errList = new ArrayList<>();
+        for (AddDataManualDto addDataManualDto : addDataManualDtoList) {
+            for (ExportTemplateVO exportTemplateVO : exportTemplateVOList) {
+                if (addDataManualDto.getData().get(exportTemplateVO.getResultCode()) == null) {
+                    errList.add(exportTemplateVO.getResultName());
+                }
+            }
+        }
+        errList = errList.stream().distinct().collect(Collectors.toList());
+        if (errList.size()>0){
+            throw new GlobalException("请检查手动录入数据,", errList+"为必填项");
+        }
     }
 }
 

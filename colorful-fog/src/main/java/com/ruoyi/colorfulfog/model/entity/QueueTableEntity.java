@@ -19,15 +19,15 @@ public class QueueTableEntity {
     String lastTable;
     String thisTable;
 
-    static public List<QueueTableEntity> queueTableEntityList(String granularityTable, Map<String, Map<String, ForeignKey>> foreignKeyMap,
+    static public List<QueueTableEntity> queueTableEntityList(String granularityTable, Map<String, Map<String,  List<ForeignKey>>> foreignKeyMap,
                                                               Set<String> keySet){
         List<QueueTableEntity> ans = new ArrayList<>();
         Queue<String> queue = new ArrayDeque<>();
         queue.add(granularityTable);
         while (!queue.isEmpty()){
             String lastTable  = queue.poll();
-            Map<String, ForeignKey> foreignKeyMap1 = foreignKeyMap.get(lastTable);
-            for (Map.Entry<String, ForeignKey> entry : foreignKeyMap1.entrySet()) {
+            Map<String,  List<ForeignKey>> foreignKeyMap1 = foreignKeyMap.get(lastTable);
+            for (Map.Entry<String,  List<ForeignKey>> entry : foreignKeyMap1.entrySet()) {
                 if (!keySet.contains(entry.getKey())){
                     continue;
                 }

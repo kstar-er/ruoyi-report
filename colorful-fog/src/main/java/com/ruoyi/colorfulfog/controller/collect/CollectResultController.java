@@ -1,13 +1,11 @@
 package com.ruoyi.colorfulfog.controller.collect;
 
 import com.ruoyi.colorfulfog.model.CollectResult;
-import com.ruoyi.colorfulfog.model.dto.CodeDto;
 import com.ruoyi.colorfulfog.service.table.CollectResultServiceImpl;
 import com.ruoyi.colorfulfog.service.table.interfaces.CollectSchemeMainService;
 import org.springframework.web.bind.annotation.*;
 import com.ruoyi.colorfulfog.model.vo.PagedListVO;
 import com.ruoyi.colorfulfog.model.vo.ResultVO;
-import com.ruoyi.colorfulfog.service.table.interfaces.DependDataService;
 import com.ruoyi.colorfulfog.utils.ResultVOUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;

@@ -2,6 +2,8 @@ package com.ruoyi.colorfulfog.service.table;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ruoyi.colorfulfog.model.dto.AddTableFieldDto;
+import com.ruoyi.colorfulfog.modules.datasource.dao.entity.DataSource;
+import com.ruoyi.colorfulfog.modules.datasource.service.impl.JdbcConstants;
 import com.ruoyi.colorfulfog.service.table.interfaces.DataSourceService;
 import com.ruoyi.common.core.exception.GlobalException;
 import lombok.extern.slf4j.Slf4j;
@@ -32,16 +34,53 @@ public class TableFieldRelationServiceImpl extends ServiceImpl<TableFieldRelatio
 
     @Override
     public List<Map> getTableFile(String tableName,Integer dataSourceId) {
-        List<Map<String,Object>> list = dataSourceService.execute("show full fields from " + tableName,dataSourceId);
+        DataSource dataSource = dataSourceService.getById(dataSourceId);
+        List<Map<String,Object>> list = dataSourceService.execute(getSqlByType(dataSource.getSourceType(),tableName),dataSourceId);
         List<Map> mapList = new ArrayList<>();
         for (Map<String,Object> map : list) {
                     Map<String,Object> map1 = new HashMap<>();
                     map1.put("field",map.get("Field"));
                     map1.put("type",map.get("Type"));
-                    map1.put("comment",map.get("Comment"));
+                    if(map.get("Comment") != null && !map.get("Comment").equals("")){
+                        map1.put("comment",map.get("Comment"));
+                    }else {
+                        map1.put("comment",map.get("Field"));
+                    }
                     mapList.add(map1);
         }
         return mapList;
+    }
+    private String getSqlByType(String type,String tableName){
+        switch (type) {
+            case JdbcConstants.ELASTIC_SEARCH_SQL:
+                return "";
+            case JdbcConstants.MYSQL:
+                return "show full fields from " + tableName;
+            case JdbcConstants.KUDU_IMAPLA:
+            case JdbcConstants.ORACLE:
+            case JdbcConstants.SQL_SERVER:
+                return "SELECT \n" +
+                        "    c.name AS Field,\n" +
+                        "    ty.name AS Type,\n" +
+                        "    c.is_nullable,\n" +
+                        "    ep.value AS Comment\n" +
+                        "FROM \n" +
+                        "    sys.columns c\n" +
+                        "    INNER JOIN sys.types ty ON c.user_type_id = ty.user_type_id\n" +
+                        "    INNER JOIN sys.tables t ON c.object_id = t.object_id\n" +
+                        "    LEFT JOIN sys.extended_properties ep ON c.object_id = ep.major_id \n" +
+                        "                                        AND c.column_id = ep.minor_id \n" +
+                        "                                        AND ep.name = 'MS_Description'\n" +
+                        "                                        AND ep.class = 1\n" +
+                        "WHERE \n" +
+                        "    t.name = '" + tableName + "'\n" +
+                        "    AND ty.is_user_defined = 0; ";
+            case JdbcConstants.JDBC:
+            case JdbcConstants.POSTGRESQL:
+            case JdbcConstants.HTTP:
+            default:
+                throw new RuntimeException("不支持该类型");
+        }
     }
 
     /**
@@ -107,6 +146,18 @@ public class TableFieldRelationServiceImpl extends ServiceImpl<TableFieldRelatio
         tableFieldRelationMapper.delete(new LambdaQueryWrapper<TableFieldRelation>()
                 .eq(TableFieldRelation::getTableName, addTableFieldDto.getTableNameList().get(0)));
         saveTableFile(addTableFieldDto);
+    }
+    @Override
+    public     Map<String,String> getDeleteFlagFieldMap(List<String> tableNameList) {
+        List<TableFieldRelation> tableFieldRelationList = list(new LambdaQueryWrapper<TableFieldRelation>()
+                .in(TableFieldRelation::getTableName, tableNameList));
+        Map<String, String> map = new HashMap<>();
+        for (TableFieldRelation tableFieldRelation : tableFieldRelationList) {
+            if (tableFieldRelation.getIsDeleteFlag() == 1) {
+                map.put(tableFieldRelation.getTableName(), tableFieldRelation.getField());
+            }
+        }
+        return map;
     }
 }
 

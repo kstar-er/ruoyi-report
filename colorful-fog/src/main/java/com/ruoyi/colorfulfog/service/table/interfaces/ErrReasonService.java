@@ -17,5 +17,6 @@ public interface ErrReasonService extends IService<ErrReason>{
 
     void saveErrReasonBatch(List<ErrReason> errReason);
     ExportErrReason exportErrReasonList(List<Integer> errReason);
+    List<ErrReason> listErrReasonByBillCode(List<String> billCodeList);
 
 }

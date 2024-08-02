@@ -1,21 +1,20 @@
 package com.ruoyi.colorfulfog.controller.bill;
 
+
+import com.ruoyi.colorfulfog.model.dto.AddDataManualDto;
 import com.ruoyi.colorfulfog.model.dto.BillResultDto;
-import com.ruoyi.colorfulfog.model.dto.CodeDto;
+
+import com.ruoyi.colorfulfog.model.dto.ExportTemplateDto;
 import com.ruoyi.colorfulfog.model.vo.BillResultVO;
-import com.ruoyi.colorfulfog.model.vo.PagedListVO;
+import com.ruoyi.colorfulfog.model.vo.ExportTemplateVO;
 import com.ruoyi.colorfulfog.model.vo.ResultVO;
 import com.ruoyi.colorfulfog.service.table.interfaces.BillMainService;
-import com.ruoyi.colorfulfog.service.table.interfaces.BillResultService;
+import com.ruoyi.colorfulfog.service.table.interfaces.SchemeDetailService;
 import com.ruoyi.colorfulfog.utils.ResultVOUtils;
-import com.ruoyi.mybatis.annotation.DataScopeAuth;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
-import javax.annotation.Resource;
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 /**
  * 账单结果控制器
@@ -27,6 +26,8 @@ public class BillResultController {
 
     @Autowired
     BillMainService billMainService;
+    @Autowired
+    SchemeDetailService schemeDetailService;
 
     /**
      * 查询账单数据
@@ -47,6 +48,23 @@ public class BillResultController {
     public ResultVO<String> setInValid(@RequestBody List<String> idList) {
         String ans =  billMainService.setInValid(idList);
         return ResultVOUtils.success(ans);
+
+    }
+    /**
+     * 手动上传账单数据
+     */
+    @PostMapping("/addDataManual")
+    public ResultVO<String> addDataManual(@RequestBody List<AddDataManualDto> billDataList) {
+
+        billMainService.addDataManual(billDataList);
+        return ResultVOUtils.success();
+    }
+    /**
+     * 导出手动导入数据的数据模板
+     */
+    @PostMapping("/exportTemplate")
+    public ResultVO<List<ExportTemplateVO>> exportTemplate(@RequestBody ExportTemplateDto exportTemplateDto) {
+        return ResultVOUtils.success(schemeDetailService.exportTemplate(exportTemplateDto.getSchemeCode()));
 
     }
 

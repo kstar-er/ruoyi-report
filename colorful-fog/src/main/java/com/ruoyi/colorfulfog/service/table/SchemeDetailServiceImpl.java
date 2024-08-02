@@ -5,9 +5,12 @@ import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.ruoyi.colorfulfog.config.exception.GlobalException;
 import com.ruoyi.colorfulfog.constant.enums.*;
 import com.ruoyi.colorfulfog.model.DependRule;
+import com.ruoyi.colorfulfog.model.SchemeMain;
 import com.ruoyi.colorfulfog.model.dto.CopyFieldDto;
+import com.ruoyi.colorfulfog.model.vo.ExportTemplateVO;
 import com.ruoyi.colorfulfog.service.busniess.interfaces.CodeService;
 import com.ruoyi.colorfulfog.service.table.interfaces.DependRuleService;
+import com.ruoyi.colorfulfog.service.table.interfaces.SchemeMainService;
 import com.ruoyi.colorfulfog.utils.GraphUtils;
 import com.ruoyi.colorfulfog.utils.JEPUtils;
 import com.ruoyi.common.utils.StringUtils;
@@ -27,6 +30,8 @@ import com.ruoyi.colorfulfog.service.table.interfaces.SchemeDetailService;
 
 import javax.annotation.Resource;
 
+import static com.ruoyi.colorfulfog.constant.enums.SchemeDetailParamEnum.ORDER_DATA;
+
 @Service
 public class SchemeDetailServiceImpl extends ServiceImpl<SchemeDetailMapper, SchemeDetail> implements SchemeDetailService {
 
@@ -35,6 +40,9 @@ public class SchemeDetailServiceImpl extends ServiceImpl<SchemeDetailMapper, Sch
 
     @Resource
     DependRuleService dependRuleService;
+
+    @Resource
+    SchemeMainService schemeMainService;
 
     @Override
     public Map<String, List<SchemeDetail>> getSchemeDetailBySchemeCode(List<String> schemeCodeList) {
@@ -76,11 +84,18 @@ public class SchemeDetailServiceImpl extends ServiceImpl<SchemeDetailMapper, Sch
             return list(new LambdaQueryWrapper<SchemeDetail>()
                     .eq(SchemeDetail::getSchemeCode, schemeCode)
                     .eq(SchemeDetail::getHideWhenExport, 1));
-        }else {
+        }
+        else if(selectTypeEnum.equals(SelectTypeEnum.TEMPLATE)){
+            return list(new LambdaQueryWrapper<SchemeDetail>()
+                    .eq(SchemeDetail::getSchemeCode, schemeCode)
+                    .eq(SchemeDetail::getType, ORDER_DATA));
+        }
+        else {
             throw new RuntimeException("未知的查询模式");
         }
 
     }
+
     @Override
     public  void addSchemeDetailBatch(List<SchemeDetail> schemeDetailList){
 
@@ -89,7 +104,7 @@ public class SchemeDetailServiceImpl extends ServiceImpl<SchemeDetailMapper, Sch
             schemeDetailList.get(i).setResultCode(codeList.get(i));
             schemeDetailList.get(i).setCalculateOrder(0); // 没进入到的默认为0
         }
-        if (schemeDetailList.stream().allMatch(s->s.getType().equals(SchemeDetailParamEnum.ORDER_DATA))){
+        if (schemeDetailList.stream().allMatch(s->s.getType().equals(ORDER_DATA))){
             saveBatch(schemeDetailList);
             return;
         }
@@ -98,7 +113,7 @@ public class SchemeDetailServiceImpl extends ServiceImpl<SchemeDetailMapper, Sch
         if (CollectionUtils.isNotEmpty(schemeDetailList1)){
             schemeDetailList.addAll(schemeDetailList1);
         }
-        if (!schemeDetailList.stream().allMatch(s->s.getType().equals(SchemeDetailParamEnum.ORDER_DATA))){
+        if (!schemeDetailList.stream().allMatch(s->s.getType().equals(ORDER_DATA))){
             calculateOrder(schemeDetailList);
         }
         saveOrUpdateBatch(schemeDetailList);
@@ -220,7 +235,7 @@ public class SchemeDetailServiceImpl extends ServiceImpl<SchemeDetailMapper, Sch
     public  void copyField(CopyFieldDto copyFieldDto){
         List<SchemeDetail> schemeDetails = listSchemeDetailBySchemeCode(copyFieldDto.getSourceSchemeCode(),SelectTypeEnum.CALC);
 
-        schemeDetails =  schemeDetails.stream().filter(s->s.getType().equals(SchemeDetailParamEnum.ORDER_DATA))
+        schemeDetails =  schemeDetails.stream().filter(s->s.getType().equals(ORDER_DATA))
                 .collect(Collectors.toList());
         List<String> newCode = codeService.getCode(IdTypeEnum.RESULT_FIELD,schemeDetails.size());
         List<SchemeDetail> newSchemeDetailList = new ArrayList<>();
@@ -238,6 +253,49 @@ public class SchemeDetailServiceImpl extends ServiceImpl<SchemeDetailMapper, Sch
             newSchemeDetailList.add(schemeDetail1);
         }
         saveBatch(newSchemeDetailList);
+    }
+    @Override
+    public List<ExportTemplateVO> exportTemplate(String schemeCode){
+        List<SchemeDetail> schemeDetailList = listSchemeDetailBySchemeCode(schemeCode,SelectTypeEnum.TEMPLATE);
+        SchemeMain schemeMain = schemeMainService.getSchemeMainByCode(schemeCode);
+        List<ExportTemplateVO> exportTemplateVOS = new ArrayList<>();
+        exportTemplateVOS.add(ExportTemplateVO.builder().resultCode("schemeCode")
+                .resultName("方案编码").resultType(ResutlTypeEnum.STRING).build());
+        exportTemplateVOS.add(ExportTemplateVO.builder().resultCode("belongArchiveCode")
+                .resultName("所属用户编码").resultType(ResutlTypeEnum.STRING).build());
+        exportTemplateVOS.add(ExportTemplateVO.builder().resultCode("belongArchiveName")
+                .resultName("所属用户名称").resultType(ResutlTypeEnum.STRING).build());
+        exportTemplateVOS.add(ExportTemplateVO.builder().resultCode("collectResultCode")
+                .resultName("汇总账单编码（填写后刷新汇总账单）").resultType(ResutlTypeEnum.STRING).build());
+        for (SchemeDetail schemeDetail : schemeDetailList) {
+            Boolean isRequred = false;
+            if(schemeDetail.getResultCode().equals(schemeMain.getTimeFieldResultCode())){
+                isRequred = true;
+            }
+            /**
+             * 如果在当前字段需要被计算，计算的顺序不为零。在添加字段时已经进行过判断了。
+             */
+            if (schemeDetail.getCalculateOrder()!=0){
+                isRequred = true;
+            }
+            exportTemplateVOS.add(
+                    ExportTemplateVO.builder()
+                            .resultCode(schemeDetail.getResultCode())
+                            .resultName(schemeDetail.getResultName())
+                            .resultType(schemeDetail.getResultType())
+                            .isRequired(isRequred)
+                            .build()
+            );
+        }
+        return exportTemplateVOS;
+
+    }
+    @Override
+    public     List<String> getOrderTableName(List<SchemeDetail> schemeDetails){
+        return schemeDetails.stream()
+                .filter(schemeDetail -> schemeDetail.getType().equals(ORDER_DATA))
+                .distinct()
+                .map(SchemeDetail::getOrderTable).collect(Collectors.toList());
     }
 }
 

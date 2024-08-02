@@ -37,10 +37,10 @@ public interface SchemeMainService extends IService<SchemeMain> {
 
     Map<String, List<Map<String, Object>>> getAllOrderData(List<SchemeDetail> schemeDetailList,
                                                            Map<String, List<OrderTableRelation>> orderTableRelationMap,
-                                                           Map<String,Map<String,ForeignKey>> foreignKeyMap,
+                                                           Map<String,Map<String, List<ForeignKey>>> foreignKeyMap,
                                                            List<DependRule> dependRuleList,
                                                            Map<String, Condition> conditionMap,List<SchemeUserRelation> schemeUserRelations,
-                                                           SchemeMain schemeMain,Integer testFlag,TimeDto timeDto
+                                                           SchemeMain schemeMain,Integer testFlag,TimeDto timeDto,Map<String,String> deleteFiledMap
                                                            );
 
     PageInfo<SchemeMain> list(SchemeMainDto schemeMainDto);
@@ -52,11 +52,13 @@ public interface SchemeMainService extends IService<SchemeMain> {
 
     List<SchemeMain> listByCode(List<String> codeList);
     List<SchemeMain> listByCode(Set<String> codeList);
+    SchemeMain getSchemeMainByCode(String code);
     List<BillData> getFlashData(BillResultFlashDto billResultDto);
     void flash(BillResultFlashDto billResultDto);
     void flashByCollectCode(BillResultFlashDto billResultDto);
 
     List<BillData> createAndCollect(CreateAndCollectDto billResultDto);
+    void deleteSchemeMain(List<Integer> idList);
 }
 
 

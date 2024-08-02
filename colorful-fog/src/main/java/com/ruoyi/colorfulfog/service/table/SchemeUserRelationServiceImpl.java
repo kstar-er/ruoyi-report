@@ -13,7 +13,7 @@ import com.ruoyi.colorfulfog.model.vo.BelongTableVO;
 import com.ruoyi.colorfulfog.model.vo.SchemeMainUserVO;
 import com.ruoyi.colorfulfog.model.vo.UserAndSchemeVO;
 import com.ruoyi.colorfulfog.model.vo.UserDataVO;
-import com.ruoyi.colorfulfog.service.table.interfaces.DataSourceService;
+import com.ruoyi.colorfulfog.service.table.interfaces.*;
 
 import com.ruoyi.colorfulfog.service.table.interfaces.OrderTableRelationService;
 import com.ruoyi.colorfulfog.service.table.interfaces.SchemeMainService;
@@ -39,6 +39,8 @@ public class SchemeUserRelationServiceImpl extends ServiceImpl<SchemeUserRelatio
     SchemeMainService schemeMainService;
     @Resource
     OrderTableRelationService orderTableRelationService;
+    @Resource
+    TableFieldRelationService tableFieldRelationService;
 
 
     @Override
@@ -70,20 +72,29 @@ public class SchemeUserRelationServiceImpl extends ServiceImpl<SchemeUserRelatio
     }
     @Override
     public List<UserDataVO> selectUserData(SelectUserDataDto selectUserDataDto){
+
         String sql = String.format("select %s,%s from %s ",selectUserDataDto.getUserDataCodeField(),selectUserDataDto.getUserDataNameField()
         ,selectUserDataDto.getUserDataTable());
         if (selectUserDataDto.getQuery()!=null && !selectUserDataDto.getQuery().isEmpty()){
             sql = sql + String.format("where %s like '%%%s%%' ",selectUserDataDto.getUserDataNameField(),selectUserDataDto.getQuery());
         }
-        if (sql.contains("where")){
-            sql+=" and is_delete = 0";
-        }else {
-            sql+=" where is_delete = 0";
+       Map<String,String> deleteFiledMap =  tableFieldRelationService.getDeleteFlagFieldMap(Collections.singletonList(selectUserDataDto.getUserDataTable()));
+        String delFlag = deleteFiledMap.get(selectUserDataDto.getUserDataTable());
+        if (delFlag!=null){
+            if (sql.contains("where")){
+                sql+=" and "+delFlag+" = 0";
+            }else {
+                sql+=" where "+delFlag+" = 0";
+            }
         }
+
         log.info("sql:{}",sql);
         List<Map<String,Object>> maps = dataSourceService.execute(sql,selectUserDataDto.getDataSourceId());
         // 将maps转换为List<UserDataVo>的形式
         List<UserDataVO> userDataVOS = new ArrayList<>();
+        if (CollectionUtils.isEmpty(maps) ){
+            return userDataVOS;
+        }
         for (Map<String, Object> map : maps) {
                      UserDataVO userDataVO = new UserDataVO();
             userDataVO.setCode(map.get(selectUserDataDto.getUserDataCodeField()).toString());
@@ -152,9 +163,6 @@ public class SchemeUserRelationServiceImpl extends ServiceImpl<SchemeUserRelatio
                 .collect(Collectors.toList());
         List<String> tableNameList = schemeMainList.stream().map(SchemeMain::getUserDataTable)
                 .collect(Collectors.toList());
-        if (tableNameList.isEmpty()){
-            return new ArrayList<>();
-        }
         Map<String, OrderTableRelation> orderTableRelationMap = orderTableRelationService.list(new LambdaQueryWrapper<OrderTableRelation>()
                 .in(OrderTableRelation::getOrderTable,tableNameList)).stream().collect(Collectors.toMap(OrderTableRelation::getOrderTable,item->item));
         List<BelongTableVO> belongTableVOList = new ArrayList<>();

@@ -3,6 +3,7 @@ package com.ruoyi.colorfulfog.service.table.interfaces;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ruoyi.colorfulfog.constant.enums.SelectTypeEnum;
 import com.ruoyi.colorfulfog.model.BillMain;
+import com.ruoyi.colorfulfog.model.dto.AddDataManualDto;
 import com.ruoyi.colorfulfog.model.dto.BillResultDto;
 import com.ruoyi.colorfulfog.model.dto.repo.DataSourceDTO;
 import com.ruoyi.colorfulfog.model.dto.repo.FilterCriteria;
@@ -32,7 +33,11 @@ public interface BillMainService extends IService<BillMain> {
      */
     String setInValid(List<String> billCode);
 
-
+    /**
+     * 手动添加账单数据
+     * @param billDataList
+     */
+    void addDataManual(List<AddDataManualDto> billDataList);
 }
 
 

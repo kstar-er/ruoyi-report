@@ -12,5 +12,8 @@ import java.util.List;
 @Data
 public class OrderTableRelationVO extends OrderTableRelation {
     List<ForeignKey> foreignKeyList;
-
+    /**
+     * 自己下面有哪些外键的list
+     */
+    List<String> fieldList;
 }

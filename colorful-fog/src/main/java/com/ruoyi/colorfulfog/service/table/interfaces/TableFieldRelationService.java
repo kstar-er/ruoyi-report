@@ -30,5 +30,10 @@ public interface TableFieldRelationService extends IService<TableFieldRelation> 
      * @param addTableFieldDto
      */
     void updateTableField(AddTableFieldDto addTableFieldDto);
+
+    /**
+     * 传入tableList,获得所有的带删除标记的字段的Map
+     */
+    Map<String,String> getDeleteFlagFieldMap(List<String> tableNameList);
 }
 

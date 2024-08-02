@@ -71,6 +71,10 @@ public class SchemeDetailController {
         schemeDetailService.updateBatchById(schemeDetail);
         return ResultVOUtils.success();
     }
+    /**
+     * 复制字段，传入源字段和目标字段，会将基础的字段直接复制到新
+     */
+
     @PostMapping("copyField")
     public ResultVO<String> copyField(@RequestBody CopyFieldDto copyFieldDto){
         schemeDetailService.copyField(copyFieldDto);

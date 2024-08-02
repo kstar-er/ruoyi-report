@@ -39,4 +39,9 @@ public class TableFieldRelation extends BaseClass {
      */
     @TableField(value = "field_name")
     private String fieldName;
+    /**
+     * 标记当前字段是否未虚拟删除的标记，如果是的话，在进行数据查询的时候需要添加这个字段进行跳过
+     */
+    @TableField(value = "is_delete_flag")
+    private Integer isDeleteFlag;
 }

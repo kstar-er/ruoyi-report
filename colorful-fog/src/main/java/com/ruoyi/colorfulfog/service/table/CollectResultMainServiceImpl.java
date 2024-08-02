@@ -24,6 +24,7 @@ import com.ruoyi.common.helper.LoginHelper;
 import com.xxl.job.core.handler.annotation.XxlJob;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.BulkOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -97,6 +98,7 @@ public class CollectResultMainServiceImpl extends ServiceImpl<CollectResultMainM
             }
         }
         long count = mongoTemplate.count(query,CollectBillData.class);
+        query.with(Sort.by(Sort.Direction.DESC, "id"));
         query.limit(pageSize).skip((long) (currentPage - 1) *pageSize);
         List<CollectBillData> billMainList = mongoTemplate.find(query,CollectBillData.class);
         BillResultVO billResultVO =  buildBillResultVO(billMainList,SelectTypeEnum.CALC);
@@ -336,9 +338,6 @@ public class CollectResultMainServiceImpl extends ServiceImpl<CollectResultMainM
         Map<CollectObjectEnum,List<ManualUpdateDto>> collectObjectEnumListMap =
                 manualUpdateDto.stream().collect(Collectors.groupingBy(ManualUpdateDto::getBillType));
 
-        Map<String,CollectResult> collectBillResultMap;
-        // 按类型进行处理
-        List<UpdateBillLog> updateBillLogs = new ArrayList<>();
         List<ManualUpdateDto> billManualUpdateDtoList = collectObjectEnumListMap.get(CollectObjectEnum.BILL);
         if (billManualUpdateDtoList!= null){
             BulkOperations bulkOps = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, BillData.class);
@@ -347,7 +346,6 @@ public class CollectResultMainServiceImpl extends ServiceImpl<CollectResultMainM
             if (CollectionUtils.isEmpty(billResultList)){
                 throw new GlobalException(ErrorCodeEnum.PARAMETER_ERROR,"找不到对应的需要修改的字段");
             }
-            // 使用code和name两个字段联合对billResultList分组
 
             for (ManualUpdateDto updateDto : billManualUpdateDtoList) {
                 BillData billResult = billResultMap.get(updateDto.getBillCode());
@@ -442,14 +440,34 @@ public class CollectResultMainServiceImpl extends ServiceImpl<CollectResultMainM
            update.set("auditTime", new Date());
        }
        if (auditDto.getAuditStatus().equals(AuditStatusEnum.WAIT_AUDIT)){
-//           if (auditDto.getAuditStatus().equals(AuditStatusEnum.PASS_AUDIT)){
-//                throw new GlobalException(ErrorCodeEnum.PARAMETER_ERROR,"审核通过后不能修改状态");
-//           }
+           checkBillStatus(auditDto.getId());
+           if (auditDto.getAuditStatus().equals(AuditStatusEnum.PASS_AUDIT)){
+                throw new GlobalException(ErrorCodeEnum.PARAMETER_ERROR,"审核通过后不能修改状态");
+           }
            update.set("autoAuditTime",auditDto.getAutoAuditTime());
        }
        update.set("auditComment", auditDto.getAuditComment());
        mongoTemplate.updateMulti(new Query(Criteria.where("_id").is(auditDto.getId())), update, CollectBillData.class);
         return "已审核";
+    }
+    private void checkBillStatus(String id){
+        CollectBillData collectBillData = mongoTemplate.findById(id,CollectBillData.class);
+        if (collectBillData==null){
+            throw new GlobalException(ErrorCodeEnum.DATA_NOT_EXIST,"汇总账单不存在");
+        }
+        List<BillData> billDataList = mongoTemplate.find(new Query(Criteria.where("collectResultCode").is(collectBillData.getBillCode())), BillData.class);
+        if (billDataList.isEmpty()){
+            throw new GlobalException(ErrorCodeEnum.DATA_NOT_EXIST,"账单不存在");
+        }
+        List<String> errCode = new ArrayList<>();
+        for (BillData billData : billDataList) {
+            if(billData.getStatus().equals(BillCheckStatusEnum.HAVE_ERROR)){
+                errCode.add(billData.getBillCode());
+            }
+        }
+        if (!errCode.isEmpty()){
+            throw new GlobalException(ErrorCodeEnum.PARAMETER_ERROR,"账单存在错误数据，无法推送审核:"+errCode);
+        }
     }
     @Override
     public  List<CollectBillData> listBillResultMapByTime(CollectResultDto collectResultDto){

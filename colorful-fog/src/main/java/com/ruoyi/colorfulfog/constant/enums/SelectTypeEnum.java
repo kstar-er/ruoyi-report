@@ -5,6 +5,7 @@ public enum SelectTypeEnum {
     CALC("计算模式"),
     PUSH("推送模式"),
     EXPORT("导出模式"),
+    TEMPLATE("模板模式"),
     ;
 
     private String msg;

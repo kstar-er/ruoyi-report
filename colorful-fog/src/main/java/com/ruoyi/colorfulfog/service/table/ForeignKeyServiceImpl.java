@@ -1,11 +1,10 @@
 package com.ruoyi.colorfulfog.service.table;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.ruoyi.colorfulfog.model.OrderTableRelation;
+import com.ruoyi.colorfulfog.model.dto.RemoveKeyDto;
 import com.ruoyi.common.core.exception.GlobalException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,7 +20,7 @@ import com.ruoyi.colorfulfog.service.table.interfaces.ForeignKeyService;
 public class ForeignKeyServiceImpl extends ServiceImpl<ForeignKeyMapper, ForeignKey> implements ForeignKeyService{
 
     @Override
-    public  Map<String, Map<String,ForeignKey>> getForeignKeyMap(List<Long> idList){
+    public  Map<String, Map<String,ForeignKey>> getForeignKeyMap(List<Integer> idList){
         List<ForeignKey> foreignKeys = list(new LambdaQueryWrapper<ForeignKey>()
                 .in(ForeignKey::getTableId,idList));
 
@@ -41,11 +40,27 @@ public class ForeignKeyServiceImpl extends ServiceImpl<ForeignKeyMapper, Foreign
         return foreignKeyMap;
     }
     @Override
-    public void deleteByOrderTableId(List<OrderTableRelation> orderTableRelations){
-        List<String> tableNames = orderTableRelations.stream().map(OrderTableRelation::getOrderTableName).collect(Collectors.toList());
-        List<ForeignKey> foreignKeys = list(new LambdaQueryWrapper<ForeignKey>().eq(ForeignKey::getTableName,tableNames));
-        List<Long> foreignKeyIds = foreignKeys.stream().map(ForeignKey::getTableId).collect(Collectors.toList());
-        removeBatchByIds(foreignKeyIds);
+    public Map<String, Map<String, List<ForeignKey>>> getForeignKeyListMap(List<Long> idList){
+        List<ForeignKey> foreignKeys = list(new LambdaQueryWrapper<ForeignKey>()
+                .in(ForeignKey::getTableId,idList));
+
+        // 构建外键关系图
+        Map<String, Map<String,List<ForeignKey>>> foreignKeyMap = new HashMap<>();
+
+        for (ForeignKey foreignKey : foreignKeys) {
+
+            String tableName = foreignKey.getTableName();
+            String foreignTable = foreignKey.getForeignTableName();
+
+            if (!foreignKeyMap.containsKey(tableName)) {
+                foreignKeyMap.put(tableName, new HashMap<>());
+            }
+            if (!foreignKeyMap.get(tableName).containsKey(foreignTable)) {
+                foreignKeyMap.get(tableName).put(foreignTable, new ArrayList<>());
+            }
+            foreignKeyMap.get(tableName).get(foreignTable).add(foreignKey);
+        }
+        return foreignKeyMap;
     }
 
     @Override
@@ -61,7 +76,7 @@ public class ForeignKeyServiceImpl extends ServiceImpl<ForeignKeyMapper, Foreign
         List<ForeignKey> foreignKeyList = new ArrayList<>();
         foreignKeyList.add(foreignKey);
         foreignKeyList.add(foreignKey1);
-        saveCheck(foreignKeyList);
+//        saveCheck(foreignKeyList);
         saveBatch(foreignKeyList);
         return  true;
     }
@@ -95,9 +110,29 @@ public class ForeignKeyServiceImpl extends ServiceImpl<ForeignKeyMapper, Foreign
             foreignKeyList.add(key);
             foreignKeyList.add(foreignKey1);
         }
-        saveCheck(foreignKeyList);
+//        saveCheck(foreignKeyList);
         saveBatch(foreignKeyList);
         return true;
     }
 
+    @Override
+    public void removeKeyPair(RemoveKeyDto removeKeyDto){
+        List<ForeignKey> foreignKeys = new ArrayList<>();
+        List<ForeignKey> foreignKey1 = list(new LambdaQueryWrapper<ForeignKey>()
+                .eq(ForeignKey::getForeignKey,removeKeyDto.getRelTableForeignKey())
+                .eq(ForeignKey::getTableName,removeKeyDto.getTableName()));
+        if(foreignKey1.size() > 1) {
+            throw new GlobalException("外键" + removeKeyDto.getRelTableForeignKey() + "在表" + removeKeyDto.getTableName() + "中存在多个关联关系");
+        }
+
+        List<ForeignKey> foreignKey2 = list(new LambdaQueryWrapper<ForeignKey>()
+                .eq(ForeignKey::getRelTableForeignKey,removeKeyDto.getRelTableForeignKey())
+                .eq(ForeignKey::getForeignTableName,removeKeyDto.getTableName()));
+        if(foreignKey1.size() > 1) {
+            throw new GlobalException("外键" + removeKeyDto.getRelTableForeignKey() + "在表" + removeKeyDto.getTableName() + "中存在多个关联关系");
+        }
+        foreignKeys.addAll(foreignKey1);
+        foreignKeys.addAll(foreignKey2);
+        removeBatchByIds(foreignKeys.stream().map(ForeignKey::getId).collect(Collectors.toList()));
+    }
 }

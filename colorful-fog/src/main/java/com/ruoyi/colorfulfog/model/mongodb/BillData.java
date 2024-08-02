@@ -18,6 +18,6 @@ import java.util.Map;
 @Document(collection = "billData")
 public class BillData extends BaseData{
 
-    //占位字段，无用
-    private String tmp;
+    // 手动上传数据的标识，0：自动生成，1：手动上传
+    private Integer manualFlag;
 }

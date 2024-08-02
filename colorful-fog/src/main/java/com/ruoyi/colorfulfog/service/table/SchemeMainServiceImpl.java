@@ -23,7 +23,6 @@ import com.google.common.collect.Range;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.BulkOperations;
@@ -36,6 +35,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -83,7 +83,8 @@ public class SchemeMainServiceImpl extends ServiceImpl<SchemeMainMapper, SchemeM
     ForeignKeyService foreignKeyService;
     @Autowired
     MongoTemplate mongoTemplate;
-
+    @Autowired
+    TableFieldRelationService tableFieldService;
     @Resource
     CollectSchemeMainService collectSchemeMainService;
     @Override
@@ -105,7 +106,7 @@ public class SchemeMainServiceImpl extends ServiceImpl<SchemeMainMapper, SchemeM
         List<OrderTableRelation> orderTableRelationList = orderTableRelationService.listByOrderName(orderTable);
         // 获得所有表的id，通过id去拿外键关系表
         List<Long> tableIdList = orderTableRelationList.stream().map(OrderTableRelation::getId).collect(Collectors.toList());
-        Map<String,Map<String,ForeignKey>> foreignKeyMap = foreignKeyService.getForeignKeyMap(tableIdList);
+        Map<String,Map<String,List<ForeignKey>>> foreignKeyMap = foreignKeyService.getForeignKeyListMap(tableIdList);
         Map<String, List<OrderTableRelation>> orderTableRelationMap = orderTableRelationList
                 .stream().collect(Collectors.groupingBy(OrderTableRelation::getOrderTable));
         // 构建外键Map，Key是tableName,value是外键
@@ -122,6 +123,8 @@ public class SchemeMainServiceImpl extends ServiceImpl<SchemeMainMapper, SchemeM
         TestBillResultOriginVO testBillResultVO = new TestBillResultOriginVO();
         List<ErrReason> dependErrReasonList = new ArrayList<>();
         List<BillData> billDataList = new ArrayList<>();
+
+        // 获得每个表中被标记未删除的字段。
         for (String schemeCode : schemeMainList) {
             SchemeMain schemeMain = stringSchemeMainMap.get(schemeCode);
             List<String> firstDependCode = schemeDetailMap.get(schemeCode).stream().map(SchemeDetail::getDependCode).collect(Collectors.toList());
@@ -140,6 +143,7 @@ public class SchemeMainServiceImpl extends ServiceImpl<SchemeMainMapper, SchemeM
             Map<String, Condition> tableConditionMap =
                     conditionService.getConditionMap(schemeCode);
             List<SchemeUserRelation> schemeUserRelations = schemeUserRelationMap.get(schemeCode);
+            Map<String,String> deleteFieldMap = tableFieldRelationService.getDeleteFlagFieldMap(schemeDetailService.getOrderTableName(schemeDetailList));
             // 获得当前已有的数据中，是否已有商家的数据，如果已有的商家，去掉不生成
             if (CollectionUtils.isEmpty(schemeUserRelations)) {
                 log.info("没有用户使用该规则，应该暂停该规则的调用");
@@ -150,7 +154,7 @@ public class SchemeMainServiceImpl extends ServiceImpl<SchemeMainMapper, SchemeM
 
             // 获得所有单据的数据
             Map<String, List<Map<String, Object>>> orderDataList = getAllOrderData(schemeDetailMap.get(schemeCode), orderTableRelationMap,foreignKeyMap,
-                    dependRuleList, tableConditionMap, schemeUserRelations, schemeMain, testFlag,timeDto);
+                    dependRuleList, tableConditionMap, schemeUserRelations, schemeMain, testFlag,timeDto,deleteFieldMap);
             String granularity = schemeMain.getGranularity();
             // 将数据按照粒度重新拆分为list，一个list中的元素生成一条账单
             List<Map<String, Map<String, Object>>> granularityDataList = getValueFromMap(orderDataList, granularity,
@@ -171,7 +175,8 @@ public class SchemeMainServiceImpl extends ServiceImpl<SchemeMainMapper, SchemeM
             BillCheckStatusEnum billMainStatus ;
             Map<String,BillData> billDataHashMap = new HashMap<>();
             for (SchemeDetail schemeDetail : sequenceSchemeDetailList) {
-                billMainStatus = BillCheckStatusEnum.WAIT_GENERATE;
+                // 默认是正常账单
+                billMainStatus = BillCheckStatusEnum.NORMAL;
                 int i = 0;
                 // 进入到需要预处理数据的schemeDetail时，在这一层做数据预处理
                 if (schemeDetail.getType().equals(SchemeDetailParamEnum.FOR_MUL_TAG)) {
@@ -199,7 +204,7 @@ public class SchemeMainServiceImpl extends ServiceImpl<SchemeMainMapper, SchemeM
                     billResult.setBillCode(billCode);
                     billResult.setBatchCode(batchCodeList.get(batchCodeIndex));
                     if (billResult.getStatus().equals(BillResult.CalculateStatusEnum.FAIL.getStatus())){
-                        billMainStatus= BillCheckStatusEnum.CAN_NOT_GENERATE;
+                        billMainStatus= BillCheckStatusEnum.HAVE_ERROR;
                     }
                     billDataHashMap.get(billCode).getData().put(billResult.getResultCode(),billResult.getValue());
                     // 判空并添加新的map进去的方法
@@ -323,6 +328,10 @@ public class SchemeMainServiceImpl extends ServiceImpl<SchemeMainMapper, SchemeM
         // 将sumMap的value转换为String格式
         for (String billCode : billResultAndBillCodeMap.keySet()) {
             Map<String, Object> billResultMap = billResultAndBillCodeMap.get(billCode);
+            if(billResultMap.get(schemeDetail.getGroupByField())==null){
+                throw new RuntimeException("汇总字段为空");
+            }
+
             String key = schemeDetail.getResultCode() + '-' +
                     billResultMap.get(schemeDetail.getGroupByField()).toString();
             if (sumMap.get(key)==null){
@@ -493,7 +502,7 @@ public class SchemeMainServiceImpl extends ServiceImpl<SchemeMainMapper, SchemeM
                 try{
                      object = orderData.get(schemeDetail.getOrderTable()).get(schemeDetail.getOrderField());
                 }catch (Exception e){
-                    throw new GlobalException("计算失败，无法获取数据: " + schemeDetail.getOrderTable()+"."+schemeDetail.getOrderField()+",无法获取");
+                    throw new GlobalException("计算失败，无法获取数据: " + schemeDetail.getOrderTable()+"."+schemeDetail.getOrderField()+",无法获取","");
                 }
                 if (object == null) {
                     value = "NULL";
@@ -649,6 +658,7 @@ public class SchemeMainServiceImpl extends ServiceImpl<SchemeMainMapper, SchemeM
                         .schemeName(schemeMain.getName())
                         .billCode(billResultMap.get("billCode").toString())
                         .dependName(dependMainMap.get(dependCode).getName())
+                        .dealFlag(0)
                 .key(value)
                 .reason(value + "不在范围").build());
         // 抛出错误，对应的值不在范围依赖表内
@@ -727,6 +737,7 @@ public class SchemeMainServiceImpl extends ServiceImpl<SchemeMainMapper, SchemeM
                     .schemeName(schemeMain.getName())
                     .dependName(dependMainMap.get(dependCode).getName())
                     .billCode(billResultMap.get("billCode").toString())
+                    .dealFlag(0)
                     .reason(key + "不在依赖数据表中")
                     .build());
             return CalculateValueVO.builder()
@@ -785,7 +796,7 @@ public class SchemeMainServiceImpl extends ServiceImpl<SchemeMainMapper, SchemeM
     private List<Map<String, Map<String, Object>>> getValueFromMap
     (Map<String, List<Map<String, Object>>> orderDataList,
      String granularityTable, Map<String, List<OrderTableRelation>> orderTableRelationMap,
-     Map<String,Map<String,ForeignKey>> foreignKeyMap,
+     Map<String,Map<String, List<ForeignKey>>> foreignKeyMap,
      Map<String,List<SchemeDetail>> tableSchemeDetailMap) {
         List<Map<String, Map<String, Object>>> resultList = new ArrayList<>();
         if (orderDataList == null) {
@@ -816,17 +827,28 @@ public class SchemeMainServiceImpl extends ServiceImpl<SchemeMainMapper, SchemeM
                 if (foreignKeyMap.get(queueTable.getLastTable()).get(queueTable.getThisTable())==null){
                     throw new GlobalException("没有找到粒度"+ queueTable.getLastTable() + "对应"+ queueTable.getThisTable() +"的数据，配置方案错误","解决:配置这两个表的外键关联");
                 }
-                String foreignKey = foreignKeyMap.get(queueTable.getLastTable()).get(queueTable.getThisTable()).getForeignKey();
-                if (tableData.get(foreignKey)==null){
-                    throw new GlobalException("没有找到外键"+foreignKey+"对应的值，配置方案错误","");
+//                String foreignKey = foreignKeyMap.get(queueTable.getLastTable()).get(queueTable.getThisTable()).getForeignKey();
+                List<ForeignKey> foreignKeyList = foreignKeyMap.get(queueTable.getLastTable()).get(queueTable.getThisTable());
+                List<Predicate<Map<String, Object>>> predicates = new ArrayList<>();
+                for (ForeignKey foreignKey : foreignKeyList) {
+                    if (tableData.get(foreignKey.getForeignKey())==null){
+                        throw new GlobalException("没有找到外键"+foreignKey+"对应的值，配置方案错误","");
+                    }
+                    // 通过外键拿到外键的值
+                    String foreignKeyValue = tableData.get(foreignKey.getForeignKey()).toString();
+                    String thisTableForeignKey = foreignKey.getRelTableForeignKey();
+                    Predicate<Map<String, Object>> currentPredicate = item ->
+                            item.get(thisTableForeignKey).toString().equals(foreignKeyValue);
+                    predicates.add(currentPredicate);
                 }
-                // 通过外键拿到外键的值
-                String foreignKeyValue = tableData.get(foreignKey).toString();
-                String thisTableForeignKey = foreignKeyMap.get(queueTable.getLastTable()).get(queueTable.getThisTable()).getRelTableForeignKey();
+                // 使用Predicate.or()来组合所有的过滤条件（假设只要满足其中一个条件即可）
+                Predicate<Map<String, Object>> combinedPredicate = predicates.stream()
+                        .reduce(Predicate::and)
+                        .orElse(o -> false); // 如果没有任何条件，则默认不匹配
                 // 获取表数据中外键值和当前外键值相等的数据，该数据应该是唯一的
-                List<Map<String, Object>> mainDataList = orderDataList.get(queueTable.getThisTable()).stream().filter(
-                        item -> item.get(thisTableForeignKey).toString().equals(foreignKeyValue)
-                ).collect(Collectors.toList());
+                List<Map<String, Object>> mainDataList = orderDataList.get(queueTable.getThisTable()).stream()
+                        .filter(combinedPredicate)
+                        .collect(Collectors.toList());
                 if (mainDataList.isEmpty()){
                     // 如果这里没有值，需要构造特殊处理，把这个表有的字段都设置为null
                     Map<String, Object> nullMap = new HashMap<>();
@@ -836,6 +858,7 @@ public class SchemeMainServiceImpl extends ServiceImpl<SchemeMainMapper, SchemeM
                     }
                     continue;
                 }
+//
                 Map<String, Object> resultValue = mainDataList.get(0);
                 resultMap.put(queueTable.getThisTable(), resultValue);
             }
@@ -857,10 +880,10 @@ public class SchemeMainServiceImpl extends ServiceImpl<SchemeMainMapper, SchemeM
      */
     public Map<String, List<Map<String, Object>>> getAllOrderData(List<SchemeDetail> schemeDetailList,
                                                                   Map<String, List<OrderTableRelation>> orderTableRelationMap,
-                                                                  Map<String, Map<String, ForeignKey>> foreignKeyMap,
+                                                                  Map<String, Map<String, List<ForeignKey>>> foreignKeyMap,
                                                                   List<DependRule> dependRuleList,
                                                                   Map<String, Condition> conditionMap, List<SchemeUserRelation> schemeUserRelations,
-                                                                  SchemeMain schemeMain, Integer testFlag, TimeDto timeDto) {
+                                                                  SchemeMain schemeMain, Integer testFlag, TimeDto timeDto,Map<String,String> deleteFieldMap) {
         Map<String, List<SchemeDetail>> schemeDetailMap = schemeDetailList.stream().filter(x -> x.getOrderTable() != null &&
                         x.getGetDataFrom().equals(GetDataFromType.TABLE))
                 .collect(Collectors.groupingBy(SchemeDetail::getOrderTable));
@@ -898,13 +921,17 @@ public class SchemeMainServiceImpl extends ServiceImpl<SchemeMainMapper, SchemeM
             throw new RuntimeException("数据库表单之间关系未定义，请联系系统管理员维护");
         }
 //        String foreignKey = orderTableRelationMap.get(userSelectTableName).get(0).getOrderForeign();
-        List<String> foreignKeyList = foreignKeyMap.get(userSelectTableName).values().stream().map(ForeignKey::getForeignKey).collect(Collectors.toList());
+        List<String> foreignKeyList = new ArrayList<>();
+        for (List<ForeignKey> foreignKeys : foreignKeyMap.get(userSelectTableName).values()) {
+            foreignKeyList.addAll(foreignKeys.stream().map(ForeignKey::getForeignKey).collect(Collectors.toList()));
+        }
+
         List<String> fieldNameList = getFieldNameList(orderTableRelationMap, userSelectTableName, schemeDetailMap, tableDependRuleMap, schemeMain.getBelongRelTableField(),foreignKeyList);
 
         String tableName = schemeDetailMap.get(userSelectTableName).get(0).getOrderTable();
         String condition = Objects.isNull(conditionMap.get(tableName)) ? "" : conditionMap.get(tableName).getConditionField();
 
-        List<Map<String, Object>> orderDataList = selectOrderDataList(tableName, fieldNameList, condition, userCondition, timeCondition, schemeMain.getDataSourceId(), testFlag);
+        List<Map<String, Object>> orderDataList = selectOrderDataList(tableName, fieldNameList, condition, userCondition, timeCondition, schemeMain.getDataSourceId(), testFlag,deleteFieldMap.get(tableName));
         tableDataMap.put(userSelectTableName, orderDataList);
         List<QueueTableEntity> queueTableEntityList = QueueTableEntity.queueTableEntityList(userSelectTableName,foreignKeyMap,schemeDetailMap.keySet());
         // 循环schemeDetailMap
@@ -916,22 +943,28 @@ public class SchemeMainServiceImpl extends ServiceImpl<SchemeMainMapper, SchemeM
             // 根据当前表以及已查询数据，判断使用哪个外键对
 //            GetForeignKeyDto getForeignKeyDto = getForeignKey(orderTable,tableDataMap,foreignKeyMap);
             String useDataTableName = queueTable.getLastTable();  // 默认使用的表名是关联用户所用的表，在发生更改外键使用表时，更新这个值
-            String foreignKey = foreignKeyMap.get(useDataTableName).get(orderTable).getForeignKey();
-            List<String> userConditionForeignKeyCodeList = tableDataMap.get(useDataTableName)
-                    .stream()
-                    .map(s -> s.get(foreignKey).toString())
-                    .collect(Collectors.toList());
-            String relForeignKey = foreignKeyMap.get(useDataTableName).get(orderTable).getRelTableForeignKey();
-            userCondition = SqlUtils.transInCondition(relForeignKey, userConditionForeignKeyCodeList);
+            List<ForeignKey> foreignKeyList1 = foreignKeyMap.get(useDataTableName).get(orderTable);
+            List<TransInConditionDto> transInConditionDtoList = new ArrayList<>();
+            for (ForeignKey foreignKey : foreignKeyList1) {
+                List<String> userConditionForeignKeyCodeList = tableDataMap.get(useDataTableName)
+                        .stream()
+                        .map(s -> s.get(foreignKey.getForeignKey()).toString())
+                        .collect(Collectors.toList());
+                String relForeignKey = foreignKey.getRelTableForeignKey();
+                transInConditionDtoList.add(TransInConditionDto.builder().filedName(relForeignKey)
+                        .codeList(userConditionForeignKeyCodeList).build());
+            }
+            userCondition = SqlUtils.transInCondition(transInConditionDtoList);
+
             foreignKeyList = new ArrayList<>();
             for (String key : foreignKeyMap.get(orderTable).keySet()) {
-                foreignKeyList.add(foreignKeyMap.get(orderTable).get(key).getForeignKey());
+                foreignKeyList.addAll(foreignKeyMap.get(orderTable).get(key).stream().map(ForeignKey::getForeignKey).collect(Collectors.toList()));
             }
             fieldNameList = getFieldNameList(orderTableRelationMap, orderTable, schemeDetailMap, tableDependRuleMap, null, foreignKeyList);
             tableName = schemeDetailMap.get(orderTable).get(0).getOrderTable();
             condition = Objects.isNull(conditionMap.get(tableName)) ? "" : conditionMap.get(tableName).getConditionField();
             // 如果测试的话只拿两条数据
-            orderDataList = selectOrderDataList(tableName, fieldNameList, condition, userCondition, "", schemeMain.getDataSourceId(), 0);
+            orderDataList = selectOrderDataList(tableName, fieldNameList, condition, userCondition, "", schemeMain.getDataSourceId(), 0,deleteFieldMap.get(tableName));
             tableDataMap.put(orderTable, orderDataList);
         }
 
@@ -954,6 +987,16 @@ public class SchemeMainServiceImpl extends ServiceImpl<SchemeMainMapper, SchemeM
 
     }
 
+    /**
+     * 传入数据拼接需要获取的字段名称
+     * @param orderTableRelationMap
+     * @param orderTable
+     * @param schemeDetailMap
+     * @param tableDependRuleMap
+     * @param belongUserField
+     * @param foreignKeyList
+     * @return
+     */
     private List<String> getFieldNameList(Map<String, List<OrderTableRelation>> orderTableRelationMap, String
             orderTable,
                                           Map<String, List<SchemeDetail>> schemeDetailMap,
@@ -978,12 +1021,16 @@ public class SchemeMainServiceImpl extends ServiceImpl<SchemeMainMapper, SchemeM
 
     private List<Map<String, Object>> selectOrderDataList(String tableName, List<String> fieldNameList,
                                                           String condition, String userCondition, String timeCondition
-            , Integer dataSourceId, Integer testFlag) {
+            , Integer dataSourceId, Integer testFlag,String deleteField) {
         // 通过拼接sql语句，将fieldNameList中的字段拼接成需要获取的语句，tableName为目标表名
         // 根据对应表名查询生效条件
         condition = SqlUtils.replaceSqlCondition(condition);
+
         String sql = "select " + String.join(",", fieldNameList) + " from " + tableName + " where "
-                + userCondition + timeCondition + (StringUtils.isBlank(condition) ? "" : " and (" + condition+ ")") + " and is_delete = 0";
+                + userCondition + timeCondition + (StringUtils.isBlank(condition) ? "" : " and (" + condition+ ")") ;
+        if (deleteField!=null){
+            sql+=" and "+deleteField+" = 0";
+        }
         sql+=" order by id desc";
         if (testFlag==1) {
             sql += " limit 2";
@@ -1208,6 +1255,10 @@ public class SchemeMainServiceImpl extends ServiceImpl<SchemeMainMapper, SchemeM
                 .in(SchemeMain::getSchemeCode, codeList));
     }
     @Override
+    public SchemeMain getSchemeMainByCode(String code){
+        return getOne(new LambdaQueryWrapper<SchemeMain>().eq(SchemeMain::getSchemeCode, code));
+    }
+    @Override
     public List<BillData> getFlashData(BillResultFlashDto billResultDto){
         List<BillData> billResultList = billResultService.listBySchemeAndBatch(billResultDto);
         if (billResultList.isEmpty()) {
@@ -1224,6 +1275,11 @@ public class SchemeMainServiceImpl extends ServiceImpl<SchemeMainMapper, SchemeM
         Map<String, List<SchemeDetail>> schemeDetailMap = schemeDetails.
                 stream().collect(Collectors.groupingBy(SchemeDetail::getSchemeCode));
         Map<String,List<BillData>> billResultGroupMap = billResultList.stream().collect(Collectors.groupingBy(BillData::getSchemeCode));
+        Map<String,BillCheckStatusEnum> billCheckStatusEnumMap = new HashMap<>();
+        for (BillData billData : billResultList) {
+            billCheckStatusEnumMap.put(billData.getBillCode(), billData.getStatus());
+            billData.setStatus(BillCheckStatusEnum.NORMAL);
+        }
         for (SchemeMain schemeMain : schemeMainList) {
 
             Map<String, Map<String, Object>> billResultMap = new HashMap<>();
@@ -1237,8 +1293,8 @@ public class SchemeMainServiceImpl extends ServiceImpl<SchemeMainMapper, SchemeM
                     .sorted(Comparator.comparing(SchemeDetail::getCalculateOrder))
                     .collect(Collectors.toList());
             // 准备依赖相关数据
-            List<String> dependCodeList=new ArrayList<>();
-            List<DependRule> dependRuleList=new ArrayList<>();
+            List<String> dependCodeList;
+            List<DependRule> dependRuleList;
             Map<String, List<DependRule>> dependRuleMap=new HashMap<>();
             Map<String, List<DependData>> dependDataMap=new HashMap<>();
             Map<String, Map<String, DependData>> dependDataMapMap=new HashMap<>();
@@ -1254,6 +1310,7 @@ public class SchemeMainServiceImpl extends ServiceImpl<SchemeMainMapper, SchemeM
                         .map(DependRule::getDependCode).distinct().collect(Collectors.toList()));
             }
             List<ErrReason> dependErrReasonList = new ArrayList<>();
+            List<String> needUpdateErrDataList = new ArrayList<>();
             // 如果已经计算成功的，也跳过，只拿失败的
             for (SchemeDetail schemeDetail : sequenceSchemeDetailList) {
                 // 数据来源是源数据的不进行覆盖
@@ -1275,32 +1332,61 @@ public class SchemeMainServiceImpl extends ServiceImpl<SchemeMainMapper, SchemeM
                         schemeDetail.getType().equals(SchemeDetailParamEnum.MIN)) {
                     calculateMaxOrMinFiled(schemeDetail, billResultMap);
                 }
-                for (BillData result : billResultGroupMap.get(schemeMain.getSchemeCode())) {
+                for (BillData billData : billResultGroupMap.get(schemeMain.getSchemeCode())) {
                     // 如果传入的值是手动更新过的值，不需要再被刷新
-                    if (result.getLastData()!=null){
-                        if (result.getLastData().get(schemeDetail.getResultCode())!=null){
+                    if (billData.getLastData()!=null){
+                        if (billData.getLastData().get(schemeDetail.getResultCode())!=null){
                             continue;
                         }
                     }
-                    // 这里不需要源数据进行计算，所以直接传入null就行。刷新错误
+                    // 这里不需要源数据进行计算，所以直接传入null就行。
                     BillResult billResult1 = calculateResultBySchemeDetail(schemeMain,schemeDetail, null, dependRuleMap,
-                            dependDataMap, dependDataMapMap, dependMainMap, billResultMap.get(result.getBillCode()), dependErrReasonList);
-                    result.getData().put(billResult1.getResultCode(), billResult1.getValue());
+                            dependDataMap, dependDataMapMap, dependMainMap, billResultMap.get(billData.getBillCode()), dependErrReasonList);
+                    if (billResult1.getStatus().equals(0)){
+                        billData.setStatus(BillCheckStatusEnum.HAVE_ERROR);
+                    }
+                    billData.getData().put(billResult1.getResultCode(), billResult1.getValue());
                 }
             }
 
             BulkOperations bulkOps = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, BillData.class);
+
+            if (!dependErrReasonList.isEmpty()) {
+                // 还需要和现有的表的错误数据做去重处理
+                errReasonService.saveErrReasonBatch(dependErrReasonList);
+            }
             for (BillData entity : billResultList) {
+                // 判断是否需要更新错误数据
+                if(billCheckStatusEnumMap.get(entity.getBillCode()).equals(BillCheckStatusEnum.HAVE_ERROR)){
+                    if (entity.getStatus().equals(BillCheckStatusEnum.NORMAL)){
+                        // 错误数据需要更新
+                        needUpdateErrDataList.add(entity.getBillCode());
+                    }
+                }
                 Query query = new Query(Criteria.where("_id").is(entity.getId()));
                 Update update = new Update()
-                        .set("data", entity.getData());
+                        .set("data", entity.getData())
+                        .set("status", entity.getStatus());
                 bulkOps.updateOne(query, update);
             }
             bulkOps.execute();
+            if (!needUpdateErrDataList.isEmpty()){
+                updateErrData(needUpdateErrDataList);
+            }
         }
         return billResultList;
     }
 
+    private void updateErrData(List<String> billCodeList){
+        List<ErrReason> errReasonList = errReasonService.listErrReasonByBillCode(billCodeList);
+        if (errReasonList.isEmpty()){
+            return;
+        }
+        for (ErrReason errReason : errReasonList) {
+            errReason.setDealFlag(1);
+        }
+        errReasonService.updateBatchById(errReasonList);
+    }
     @Override
     public void flash(BillResultFlashDto billResultDto) {
         // 获取账单数据
@@ -1322,6 +1408,17 @@ public class SchemeMainServiceImpl extends ServiceImpl<SchemeMainMapper, SchemeM
             billDataList.addAll(startCreateBill(Collections.singletonList(schemeCode),2,createAndCollectDto.getTimeDto()).getBillDataList());
         }
         return billDataList;
+    }
+    @Override
+    public void deleteSchemeMain(List<Integer> idList){
+        List<SchemeMain> schemeMainList = listByIds(idList);
+        List<String> schemeCodeList = schemeMainList.stream().map(SchemeMain::getSchemeCode).collect(Collectors.toList());
+        List<SchemeDetail> schemeDetailList = schemeDetailService.listSchemeDetailBySchemeCode(schemeCodeList,SelectTypeEnum.CALC);
+        schemeDetailService.removeBatchByIds(schemeDetailList.stream().map(SchemeDetail::getId).collect(Collectors.toList()));
+        List<SchemeUserRelation> schemeUserRelationList = schemeUserRelationService.listBySchemeCode(schemeCodeList);
+        schemeUserRelationService.removeBatchByIds(schemeUserRelationList.stream().map(SchemeUserRelation::getId).collect(Collectors.toList()));
+        // 删除scheme主表
+        removeBatchByIds(idList);
     }
 }
 

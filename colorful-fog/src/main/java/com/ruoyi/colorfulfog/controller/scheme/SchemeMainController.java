@@ -91,7 +91,7 @@ public class SchemeMainController {
     //删除计划内容主表
     @PostMapping("/deleteSchemeMain")
     public ResultVO<String> deleteSchemeMain(@RequestBody List<Integer> ids){
-        schemeMainService.removeBatchByIds(ids);
+        schemeMainService.deleteSchemeMain(ids);
         return ResultVOUtils.success();
     }
 
@@ -114,11 +114,22 @@ public class SchemeMainController {
         schemeMainService.flash(billResultDto);
         return ResultVOUtils.success();
     }
+
+    /**
+     * 传入汇总账单编码对数据进行刷新
+     * @param billResultDto
+     * @return
+     */
     @PostMapping("flashByCollectCode")
     public ResultVO<String> flashByCollectCode(@RequestBody BillResultFlashDto billResultDto) {
         schemeMainService.flashByCollectCode(billResultDto);
         return ResultVOUtils.success();
     }
+
+    /**
+     * 获得方案主表的所有分组类型
+     * @return
+     */
     @PostMapping("getGroupType")
     public ResultVO<List<String>> getGroupTyp(){
         return  ResultVOUtils.success(schemeMainService.list(new LambdaQueryWrapper<SchemeMain>()
@@ -126,14 +137,15 @@ public class SchemeMainController {
                 .collect(Collectors.toList()));
     }
 
+    /**
+     *
+     * @return
+     */
     @PostMapping("getBelongTable")
     public ResultVO<List<SchemeMain>> getBelongTable(){
         return  ResultVOUtils.success();
     }
 
-    /**
-     * 复制字段，传入源字段和目标字段，会将基础的字段直接复制到新
-     */
 
 
 }

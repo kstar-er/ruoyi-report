@@ -59,7 +59,7 @@ public class OrderTableController {
      */
     @PostMapping("/add")
     public ResultVO<String> add(@RequestBody OrderTableRelation orderTableRelation){
-        orderTableRelationService.saveAndAddField(Collections.singletonList(orderTableRelation));
+        orderTableRelationService.save(orderTableRelation);
         return ResultVOUtils.success();
     }
 
@@ -81,8 +81,6 @@ public class OrderTableController {
      */
     @PostMapping("/delete")
     public ResultVO<String> delete(@RequestBody List<Integer> ids){
-        List<OrderTableRelation> orderTableRelations = orderTableRelationService.listByIds(ids);
-        foreignKeyService.deleteByOrderTableId(orderTableRelations);
         orderTableRelationService.removeBatchByIds(ids);
         return ResultVOUtils.success();
     }

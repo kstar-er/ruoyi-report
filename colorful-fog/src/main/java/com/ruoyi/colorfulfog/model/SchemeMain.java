@@ -101,6 +101,10 @@ public class SchemeMain extends BaseClass {
     @TableField(value = "time_field_name")
     @ApiModelProperty(value = "时间字段名称")
     private String timeFieldName;
+    @TableField(value = "use_user_table")
+    @ApiModelProperty(value = "是否使用用户表分组")
+    private Boolean useUserTable;
+
 
 
 

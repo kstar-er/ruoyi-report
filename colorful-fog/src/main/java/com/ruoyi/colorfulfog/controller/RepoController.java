@@ -29,7 +29,7 @@ public class RepoController {
      * 获取数据
      */
     @PostMapping("/getData")
-    public ResultVO<Map<String, List<Map<String, Double>>>> getData(@RequestBody DataSourceDTO dataSourceDTO) {
+    public  ResultVO<Map<String, Map<String, Double>>> getData(@RequestBody DataSourceDTO dataSourceDTO) {
         return ResultVOUtils.success(repoService.getData(dataSourceDTO));
     }
 

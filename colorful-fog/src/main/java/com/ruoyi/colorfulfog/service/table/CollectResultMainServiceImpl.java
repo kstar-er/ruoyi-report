@@ -1,11 +1,15 @@
 package com.ruoyi.colorfulfog.service.table;
 
-import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.pagehelper.PageInfo;
 import com.ruoyi.colorfulfog.config.exception.GlobalException;
 import com.ruoyi.colorfulfog.constant.enums.*;
-import com.ruoyi.colorfulfog.model.*;
+import com.ruoyi.colorfulfog.mapper.CollectResultMainMapper;
+import com.ruoyi.colorfulfog.model.CollectResultMain;
+import com.ruoyi.colorfulfog.model.CollectSchemeDetail;
+import com.ruoyi.colorfulfog.model.CollectSchemeMain;
+import com.ruoyi.colorfulfog.model.SchemeMain;
 import com.ruoyi.colorfulfog.model.dto.*;
 import com.ruoyi.colorfulfog.model.dto.repo.DataSourceDTO;
 import com.ruoyi.colorfulfog.model.dto.repo.FilterCriteria;
@@ -18,7 +22,6 @@ import com.ruoyi.colorfulfog.model.vo.BillResultVO;
 import com.ruoyi.colorfulfog.model.vo.ExportExcelVO;
 import com.ruoyi.colorfulfog.model.vo.ResultNameCodeVO;
 import com.ruoyi.colorfulfog.service.table.interfaces.*;
-import com.github.pagehelper.PageInfo;
 import com.ruoyi.colorfulfog.utils.TimeUtils;
 import com.ruoyi.common.helper.LoginHelper;
 import com.xxl.job.core.handler.annotation.XxlJob;
@@ -31,18 +34,12 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
-
-import java.lang.reflect.Field;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.ruoyi.colorfulfog.mapper.CollectResultMainMapper;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
+import java.lang.reflect.Field;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -86,6 +83,9 @@ public class CollectResultMainServiceImpl extends ServiceImpl<CollectResultMainM
         if (billResultDto.getCostTerm()!=null){
             query.addCriteria(Criteria.where("costTerm").is(billResultDto.getCostTerm()));
         }
+        if (billResultDto.getBillCode()!=null){
+            query.addCriteria(Criteria.where("billCode").is(billResultDto.getBillCode()));
+        }
         if (billResultDto.getAuditStatus()!=null){
             query.addCriteria(Criteria.where("auditStatus").is(billResultDto.getAuditStatus()));
         }
@@ -126,7 +126,7 @@ public class CollectResultMainServiceImpl extends ServiceImpl<CollectResultMainM
         }
     }
     @Override
-    public Map<String, List<Map<String, Double>>> list(DataSourceDTO dataSourceDTO, List<FilterCriteria> filterCriteriaList){
+    public Map<String, Map<String, Double>> list(DataSourceDTO dataSourceDTO, List<FilterCriteria> filterCriteriaList){
         // 按方案编码，时间，账单编码等参数查询
         Query query = new Query();
         if (dataSourceDTO.getSourceValue().isEmpty()){
@@ -324,6 +324,7 @@ public class CollectResultMainServiceImpl extends ServiceImpl<CollectResultMainM
         }
     }
 
+
     @Override
     public String manualUpdate(List<ManualUpdateDto> manualUpdateDto){
         String updateUser;
@@ -332,13 +333,19 @@ public class CollectResultMainServiceImpl extends ServiceImpl<CollectResultMainM
         }else {
             updateUser= LoginHelper.getUsername();
         }
+        if (manualUpdateDto.get(0).getBillType().equals(CollectObjectEnum.BILL)){
+            return billDataManualUpdate(manualUpdateDto,updateUser);
+        }else if (manualUpdateDto.get(0).getBillType().equals(CollectObjectEnum.COLLECT)){
+            return collectBillDataManualUpdate(manualUpdateDto,updateUser);
+        }
+        throw new GlobalException(ErrorCodeEnum.PARAMETER_ERROR,"不支持的类型");
+    }
+    @Override
+    public String billDataManualUpdate(List<ManualUpdateDto> billManualUpdateDtoList,String updateUser){
+
         String updateTime = TimeUtils.format(new Date(),"yyyy-MM-dd HH:mm:ss");
         long updateCount =0;
         // 按类型进行分组
-        Map<CollectObjectEnum,List<ManualUpdateDto>> collectObjectEnumListMap =
-                manualUpdateDto.stream().collect(Collectors.groupingBy(ManualUpdateDto::getBillType));
-
-        List<ManualUpdateDto> billManualUpdateDtoList = collectObjectEnumListMap.get(CollectObjectEnum.BILL);
         if (billManualUpdateDtoList!= null){
             BulkOperations bulkOps = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, BillData.class);
             List<BillData> billResultList = billResultService.listByBillCodeAndName(billManualUpdateDtoList);
@@ -363,6 +370,7 @@ public class CollectResultMainServiceImpl extends ServiceImpl<CollectResultMainM
                             .updateTime(updateTime)
                             .originValue(billResult.getData().get(updateDto.getFieldCode()).toString())
                             .afterValue(updateDto.getUpdateValue().toString())
+                            .comment(updateDto.getComment())
                             .build();
                     updateRecordList.add(updateRecord);
                     updateCount++;
@@ -381,8 +389,14 @@ public class CollectResultMainServiceImpl extends ServiceImpl<CollectResultMainM
             }
             bulkOps.execute();
         }
+        return "本次更新成功条数："+updateCount;
+    }
+    @Override
+    public String collectBillDataManualUpdate(List<ManualUpdateDto> collectManualUpdateDtoList,String updateUser){
 
-        List<ManualUpdateDto> collectManualUpdateDtoList = collectObjectEnumListMap.get(CollectObjectEnum.COLLECT);
+        String updateTime = TimeUtils.format(new Date(),"yyyy-MM-dd HH:mm:ss");
+        long updateCount =0;
+        // 按类型进行分组
         if (collectManualUpdateDtoList!= null){
             BulkOperations bulkOps = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, CollectBillData.class);
             List<CollectBillData> collectResultList = collectResultService.listByBillCodeAndName(collectManualUpdateDtoList);
@@ -391,42 +405,43 @@ public class CollectResultMainServiceImpl extends ServiceImpl<CollectResultMainM
             }
             Map<String,CollectBillData> billResultMap = collectResultList.stream().collect(Collectors.toMap(CollectBillData::getBillCode, s->s));
             // 使用code和name两个字段联合对billResultList分组
-                for (ManualUpdateDto updateDto : collectManualUpdateDtoList) {
-                    CollectBillData billResult = billResultMap.get(updateDto.getBillCode());
-                    Map<String,List<UpdateRecord>> updateRecordMap = billResult.getLastData();
-                    if (updateRecordMap==null){
-                        updateRecordMap = new HashMap<>();
-                    }
-                    if (billResult.getData().get(updateDto.getFieldCode())==null) {
-                        billResult.getData().put(updateDto.getFieldCode(),"");
-                    }
-                    if (!billResult.getData().get(updateDto.getFieldCode()).equals(updateDto.getUpdateValue())){
-                        List<UpdateRecord> updateRecordList = updateRecordMap.get(updateDto.getFieldCode());
-                        if (updateRecordList==null){
-                            updateRecordList = new ArrayList<>();
-                        }
-                        UpdateRecord updateRecord = UpdateRecord.builder()
-                                .updateUser(updateUser)
-                                .updateTime(updateTime)
-                                .originValue(billResult.getData().get(updateDto.getFieldCode()).toString())
-                                .afterValue(updateDto.getUpdateValue().toString())
-                                .build();
-                        updateRecordList.add(updateRecord);
-                        updateCount++;
-                        updateRecordMap.put(updateDto.getFieldCode(),updateRecordList);
-                        billResult.getData().put(updateDto.getFieldCode(),updateDto.getUpdateValue());
-                        // 不等的时候才更新，相等就不更新了
-                        Query query = new Query(Criteria.where("_id").is(billResult.getId()));
-                        Update update = new Update()
-                                .set("data", billResult.getData())
-                                .set("lastData", updateRecordMap);
-                        bulkOps.updateOne(query, update);
-                    }
+            for (ManualUpdateDto updateDto : collectManualUpdateDtoList) {
+                CollectBillData billResult = billResultMap.get(updateDto.getBillCode());
+                Map<String,List<UpdateRecord>> updateRecordMap = billResult.getLastData();
+                if (updateRecordMap==null){
+                    updateRecordMap = new HashMap<>();
                 }
-                if(updateCount==0){
-                    return "本次更新成功条数："+0;
+                if (billResult.getData().get(updateDto.getFieldCode())==null) {
+                    billResult.getData().put(updateDto.getFieldCode(),"");
                 }
-                bulkOps.execute();
+                if (!billResult.getData().get(updateDto.getFieldCode()).equals(updateDto.getUpdateValue())){
+                    List<UpdateRecord> updateRecordList = updateRecordMap.get(updateDto.getFieldCode());
+                    if (updateRecordList==null){
+                        updateRecordList = new ArrayList<>();
+                    }
+                    UpdateRecord updateRecord = UpdateRecord.builder()
+                            .updateUser(updateUser)
+                            .updateTime(updateTime)
+                            .originValue(billResult.getData().get(updateDto.getFieldCode()).toString())
+                            .afterValue(updateDto.getUpdateValue().toString())
+                            .comment(updateDto.getComment())
+                            .build();
+                    updateRecordList.add(updateRecord);
+                    updateCount++;
+                    updateRecordMap.put(updateDto.getFieldCode(),updateRecordList);
+                    billResult.getData().put(updateDto.getFieldCode(),updateDto.getUpdateValue());
+                    // 不等的时候才更新，相等就不更新了
+                    Query query = new Query(Criteria.where("_id").is(billResult.getId()));
+                    Update update = new Update()
+                            .set("data", billResult.getData())
+                            .set("lastData", updateRecordMap);
+                    bulkOps.updateOne(query, update);
+                }
+            }
+            if(updateCount==0){
+                return "本次更新成功条数："+0;
+            }
+            bulkOps.execute();
         }
         return "本次更新成功条数："+updateCount;
     }
@@ -513,5 +528,25 @@ public class CollectResultMainServiceImpl extends ServiceImpl<CollectResultMainM
         }
         mongoTemplate.updateFirst(new Query(Criteria.where("_id").is(collectBillData.getId())), update, CollectBillData.class);
 
+    }
+    @Override
+    public List<CollectBillData> getCostTerm(GetCostTermDto getCostTermDto){
+        Query query = new Query();
+        query.addCriteria(Criteria.where("schemeCode").is(getCostTermDto.getCollectSchemeCode()));
+        query.addCriteria(Criteria.where("belongArchiveCode").in(getCostTermDto.getUserCodeList()));
+        return mongoTemplate.find(query,CollectBillData.class);
+    }
+    @Override
+    public void deleteByIds(List<String> billCodeList){
+        List<CollectBillData> collectBillData = mongoTemplate.find(new Query(Criteria.where("billCode").in(billCodeList)),CollectBillData.class);
+        if (collectBillData.isEmpty()){
+            throw new GlobalException(ErrorCodeEnum.DATA_NOT_EXIST,"汇总账单不存在");
+        }
+        for (CollectBillData collectBillDatum : collectBillData) {
+            if(collectBillDatum.getAuditStatus().equals(AuditStatusEnum.PASS_AUDIT)){
+                throw new GlobalException(ErrorCodeEnum.PARAMETER_ERROR,"审核通过的汇总账单不能删除");
+            }
+        }
+        mongoTemplate.remove(new Query(Criteria.where("billCode").in(billCodeList)),CollectBillData.class);
     }
 }

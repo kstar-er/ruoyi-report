@@ -21,16 +21,17 @@ public class repoServiceImpl implements RepoService {
     BillMainService billMainService;
 
     @Override
-    public Map<String, List<Map<String, Double>>> getData(DataSourceDTO dataSourceDTO){
+    public Map<String, Map<String, Double>> getData(  DataSourceDTO dataSourceDTO){
         //根据接口名判断调取哪个接口
         String sourceInterfaceName = dataSourceDTO.getSourceInterfaceName();
         if ("collectResult".equals(sourceInterfaceName)){
-          return  collectResultMainService.list(dataSourceDTO,dataSourceDTO.getFilterCriteria());
+            return  collectResultMainService.list(dataSourceDTO,dataSourceDTO.getFilterCriteria());
         }else if ("billMain".equals(sourceInterfaceName)){
-          return billMainService.list(dataSourceDTO,dataSourceDTO.getFilterCriteria());
+            return billMainService.list(dataSourceDTO,dataSourceDTO.getFilterCriteria());
+
         }
+
         return null;
     }
-
 
 }

@@ -2,11 +2,17 @@ package com.ruoyi.colorfulfog.service.table;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ruoyi.colorfulfog.config.exception.GlobalException;
+import com.ruoyi.colorfulfog.constant.enums.CollectDataTypeEnum;
 import com.ruoyi.colorfulfog.constant.enums.ErrorCodeEnum;
+import com.ruoyi.colorfulfog.mapper.SchemeUserRelationMapper;
+import com.ruoyi.colorfulfog.model.CollectSchemeDetail;
 import com.ruoyi.colorfulfog.model.OrderTableRelation;
 import com.ruoyi.colorfulfog.model.SchemeMain;
+import com.ruoyi.colorfulfog.model.SchemeUserRelation;
 import com.ruoyi.colorfulfog.model.dto.BindUserDto;
+import com.ruoyi.colorfulfog.model.dto.GetUserBySchemeDto;
 import com.ruoyi.colorfulfog.model.dto.SelectUserDataDto;
 import com.ruoyi.colorfulfog.model.dto.TableNameDto;
 import com.ruoyi.colorfulfog.model.vo.BelongTableVO;
@@ -14,17 +20,10 @@ import com.ruoyi.colorfulfog.model.vo.SchemeMainUserVO;
 import com.ruoyi.colorfulfog.model.vo.UserAndSchemeVO;
 import com.ruoyi.colorfulfog.model.vo.UserDataVO;
 import com.ruoyi.colorfulfog.service.table.interfaces.*;
-
-import com.ruoyi.colorfulfog.service.table.interfaces.OrderTableRelationService;
-import com.ruoyi.colorfulfog.service.table.interfaces.SchemeMainService;
 import com.ruoyi.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.ruoyi.colorfulfog.mapper.SchemeUserRelationMapper;
-import com.ruoyi.colorfulfog.model.SchemeUserRelation;
-import com.ruoyi.colorfulfog.service.table.interfaces.SchemeUserRelationService;
 
 import javax.annotation.Resource;
 import java.util.*;
@@ -41,6 +40,8 @@ public class SchemeUserRelationServiceImpl extends ServiceImpl<SchemeUserRelatio
     OrderTableRelationService orderTableRelationService;
     @Resource
     TableFieldRelationService tableFieldRelationService;
+    @Resource
+    CollectSchemeDetailService collectSchemeDetailService;
 
 
     @Override
@@ -55,6 +56,14 @@ public class SchemeUserRelationServiceImpl extends ServiceImpl<SchemeUserRelatio
             return null;
         }
        return list(new LambdaQueryWrapper<SchemeUserRelation>().in(SchemeUserRelation::getSchemeCode,codeList));
+    }
+    @Override
+    public List<SchemeUserRelation> listBySchemeCodeAndUserCode(List<String> schemeCode, List<String> userCode){
+        if (CollectionUtils.isEmpty(userCode)){
+            return null;
+        }
+        return list(new LambdaQueryWrapper<SchemeUserRelation>().in(SchemeUserRelation::getSchemeCode,schemeCode)
+                .in(SchemeUserRelation::getArchiveUserCode,userCode));
     }
     @Override
     public     List<SchemeUserRelation> listBySchemeCode(String code){
@@ -205,6 +214,28 @@ public class SchemeUserRelationServiceImpl extends ServiceImpl<SchemeUserRelatio
                     .build());
         }
         return userAndSchemeVOList;
+    }
+    @Override
+    public List<SchemeUserRelation> getUserBySchemeCode(GetUserBySchemeDto getUserBySchemeDto){
+        if (getUserBySchemeDto.getCollectDataTypeEnum().equals(CollectDataTypeEnum.SCHEME)){
+            return list(new LambdaQueryWrapper<SchemeUserRelation>()
+                    .eq(SchemeUserRelation::getSchemeCode,getUserBySchemeDto.getSchemeCode()));
+        }else {
+            List<CollectSchemeDetail>collectSchemeDetails = collectSchemeDetailService.list(new LambdaQueryWrapper<CollectSchemeDetail>()
+                    .eq(CollectSchemeDetail::getCollectSchemeCode,getUserBySchemeDto.getSchemeCode()));
+
+            List<String> schemeCodeList = collectSchemeDetails.stream().map(CollectSchemeDetail::getSchemeCode).filter(Objects::nonNull).collect(Collectors.toList());
+            List<SchemeUserRelation> schemeUserRelations = list(new LambdaQueryWrapper<SchemeUserRelation>().in(SchemeUserRelation::getSchemeCode,schemeCodeList));
+            Map<String, SchemeUserRelation> uniqueRelations = schemeUserRelations.stream()
+                    .collect(Collectors.toMap(
+                            SchemeUserRelation::getArchiveUserCode, // 键是ArchiveUserCode
+                            s->s,
+                            (existing, replacement) -> existing     // 键冲突时保留旧值（或根据需要选择replacement）
+                    ));
+            // uniqueRelations转换回list的形式
+            return new ArrayList<>(uniqueRelations.values());
+        }
+
     }
 }
 

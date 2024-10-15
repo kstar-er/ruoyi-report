@@ -1,25 +1,22 @@
 package com.ruoyi.colorfulfog.service.table;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ruoyi.colorfulfog.config.exception.GlobalException;
-import com.ruoyi.colorfulfog.constant.enums.SchemeDetailParamEnum;
 import com.ruoyi.colorfulfog.constant.enums.SelectTypeEnum;
-import com.ruoyi.colorfulfog.model.SchemeDetail;
+import com.ruoyi.colorfulfog.mapper.CollectSchemeDetailMapper;
+import com.ruoyi.colorfulfog.model.CollectSchemeDetail;
+import com.ruoyi.colorfulfog.service.table.interfaces.CollectSchemeDetailService;
 import com.ruoyi.colorfulfog.utils.GraphUtils;
 import com.ruoyi.colorfulfog.utils.JEPUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.ruoyi.colorfulfog.model.CollectSchemeDetail;
-import com.ruoyi.colorfulfog.mapper.CollectSchemeDetailMapper;
-import com.ruoyi.colorfulfog.service.table.interfaces.CollectSchemeDetailService;
-import org.springframework.util.CollectionUtils;
 
 @Service
 public class CollectSchemeDetailServiceImpl extends ServiceImpl<CollectSchemeDetailMapper, CollectSchemeDetail> implements CollectSchemeDetailService{
@@ -49,6 +46,11 @@ public class CollectSchemeDetailServiceImpl extends ServiceImpl<CollectSchemeDet
                     .in(CollectSchemeDetail::getCollectSchemeCode, schemeCodeList));
         }
         throw new RuntimeException("未知的查询模式");
+    }
+    @Override
+    public  List<CollectSchemeDetail> listBySchemeCode(String code){
+        return list(new LambdaQueryWrapper<CollectSchemeDetail>().
+                eq(CollectSchemeDetail::getSchemeCode,code));
     }
     @Override
     public void calculateOrder(String collectSchemeCode){

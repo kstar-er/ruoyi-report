@@ -18,4 +18,5 @@ public class CollectResultDto {
     String belongArchiveCode;
     String costTerm;
     String collectSchemeCode;
+    String belongArchiveName;
 }

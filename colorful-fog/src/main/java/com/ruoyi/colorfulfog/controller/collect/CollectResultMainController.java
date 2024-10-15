@@ -88,4 +88,14 @@ public class CollectResultMainController {
     public ResultVO<String> audit(@RequestBody AuditDto auditDto) {
         return ResultVOUtils.success(collectResultMainService.audit(auditDto));
     }
+
+    @PostMapping("getCostTerm")
+    public ResultVO<List<CollectBillData>> getCostTerm(@RequestBody GetCostTermDto getCostTermDto) {
+        return ResultVOUtils.success(collectResultMainService.getCostTerm(getCostTermDto));
+    }
+    @PostMapping("delete")
+    public ResultVO<String> delete(@RequestBody List<String> billCode) {
+        collectResultMainService.deleteByIds(billCode);
+        return ResultVOUtils.success();
+    }
 }

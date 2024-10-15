@@ -2,11 +2,12 @@ package com.ruoyi.colorfulfog.service.table;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ruoyi.colorfulfog.config.exception.GlobalException;
-import com.ruoyi.colorfulfog.constant.enums.BillCheckStatusEnum;
-import com.ruoyi.colorfulfog.constant.enums.CollectDataTypeEnum;
 import com.ruoyi.colorfulfog.constant.enums.CollectObjectEnum;
 import com.ruoyi.colorfulfog.constant.enums.ErrorCodeEnum;
+import com.ruoyi.colorfulfog.mapper.BillResultMapper;
+import com.ruoyi.colorfulfog.model.BillResult;
 import com.ruoyi.colorfulfog.model.dto.BillResultFlashDto;
 import com.ruoyi.colorfulfog.model.dto.CollectResultDto;
 import com.ruoyi.colorfulfog.model.dto.ManualUpdateDto;
@@ -14,16 +15,12 @@ import com.ruoyi.colorfulfog.model.mongodb.BaseData;
 import com.ruoyi.colorfulfog.model.mongodb.BillData;
 import com.ruoyi.colorfulfog.model.mongodb.CollectBillData;
 import com.ruoyi.colorfulfog.service.table.interfaces.BillMainService;
+import com.ruoyi.colorfulfog.service.table.interfaces.BillResultService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
-
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.ruoyi.colorfulfog.mapper.BillResultMapper;
-import com.ruoyi.colorfulfog.model.BillResult;
-import com.ruoyi.colorfulfog.service.table.interfaces.BillResultService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -66,7 +63,7 @@ public class BillResultServiceImpl extends ServiceImpl<BillResultMapper, BillRes
             oldQuery.addCriteria(Criteria.where("belongArchiveCode").is(collectResultDto.getBelongArchiveCode()));
             List<CollectBillData> collectBillData = mongoTemplate.find(oldQuery,CollectBillData.class);
             if (!collectBillData.isEmpty()){
-                throw new GlobalException(ErrorCodeEnum.PARAMETER_ERROR,"该时间段内该商家已经存在汇总数据。请勿重复生成");
+                throw new GlobalException(ErrorCodeEnum.PARAMETER_ERROR,"该时间段内该商家已经存在汇总数据。请先删除："+collectBillData.stream().map(CollectBillData::getBillCode).collect(Collectors.toList())+",再重新生成");
             }
         }else{
             Query oldQuery = new Query();

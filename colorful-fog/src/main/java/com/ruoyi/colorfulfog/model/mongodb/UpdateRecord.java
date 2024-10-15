@@ -10,4 +10,5 @@ public class UpdateRecord {
     String updateTime;
     String originValue;
     String afterValue;
+    String comment;
 }

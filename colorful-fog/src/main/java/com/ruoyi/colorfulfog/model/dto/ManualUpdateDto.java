@@ -3,12 +3,14 @@ package com.ruoyi.colorfulfog.model.dto;
 
 
 import com.ruoyi.colorfulfog.constant.enums.CollectObjectEnum;
+import lombok.Builder;
 import lombok.Data;
 
 /**
  * 手动更新账单数据接口
  */
 @Data
+@Builder
 public class ManualUpdateDto {
     /**
      * 确认要修改的是账单表还是汇总表的数据
@@ -32,4 +34,5 @@ public class ManualUpdateDto {
     Object updateValue;
 
     String updateUser;
+    String comment;
 }

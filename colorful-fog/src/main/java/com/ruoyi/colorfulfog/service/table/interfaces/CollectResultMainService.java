@@ -1,12 +1,11 @@
 package com.ruoyi.colorfulfog.service.table.interfaces;
 
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.ruoyi.colorfulfog.constant.enums.SelectTypeEnum;
 import com.ruoyi.colorfulfog.model.CollectResultMain;
-import com.baomidou.mybatisplus.extension.service.IService;
 import com.ruoyi.colorfulfog.model.dto.*;
 import com.ruoyi.colorfulfog.model.dto.repo.DataSourceDTO;
 import com.ruoyi.colorfulfog.model.dto.repo.FilterCriteria;
-import com.ruoyi.colorfulfog.model.mongodb.BillData;
 import com.ruoyi.colorfulfog.model.mongodb.CollectBillData;
 import com.ruoyi.colorfulfog.model.vo.BillResultVO;
 import com.ruoyi.colorfulfog.model.vo.ExportExcelVO;
@@ -22,7 +21,7 @@ public interface CollectResultMainService extends IService<CollectResultMain>{
     List<CollectBillData> listByIdList(List<String> billCodes);
     List<CollectBillData> listByBillCode(String billCodes);
 
-    Map<String, List<Map<String, Double>>> list(DataSourceDTO dataSourceDTO, List<FilterCriteria> filterCriteriaList);
+    Map<String, Map<String, Double>> list(DataSourceDTO dataSourceDTO, List<FilterCriteria> filterCriteriaList);
 
     void buildQueryCriteria(Query query, FilterCriteria filterCriteria, String fieldName, List<String> value);
 
@@ -38,10 +37,23 @@ public interface CollectResultMainService extends IService<CollectResultMain>{
     List<ExportExcelVO> exportExcel(ExportExcelDto exportExcelDto,SelectTypeEnum selectTypeEnum);
     List<ExportExcelVO> exportExcelBatch(List<String> idList,SelectTypeEnum selectTypeEnum);
 
+    // 更新接口，需要传入账单编号，以及需要更新的字段
+    // 根据不同的类型调用不同表的更新方法
     String manualUpdate(List<ManualUpdateDto> manualUpdateDto);
 
     String audit(AuditDto auditDto);
 
     List<CollectBillData> listBillResultMapByTime(CollectResultDto collectResultDto);
     void updateBillData(CollectBillData collectBillData);
+    List<CollectBillData> getCostTerm(GetCostTermDto getCostTermDto);
+
+    /**
+     * 通过账单编码删除
+     * @param billCode
+     */
+    void deleteByIds(List<String> billCode);
+    String billDataManualUpdate(List<ManualUpdateDto> billManualUpdateDtoList,String updateUser);
+    String collectBillDataManualUpdate(List<ManualUpdateDto> collectManualUpdateDtoList,String updateUser);
+
+
 }

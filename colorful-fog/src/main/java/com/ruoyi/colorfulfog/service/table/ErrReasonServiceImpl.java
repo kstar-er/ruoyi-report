@@ -1,38 +1,30 @@
 package com.ruoyi.colorfulfog.service.table;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ruoyi.colorfulfog.config.exception.GlobalException;
 import com.ruoyi.colorfulfog.constant.enums.DependTypeEnum;
 import com.ruoyi.colorfulfog.constant.enums.SelectTypeEnum;
+import com.ruoyi.colorfulfog.mapper.ErrReasonMapper;
 import com.ruoyi.colorfulfog.model.DependData;
 import com.ruoyi.colorfulfog.model.DependMain;
+import com.ruoyi.colorfulfog.model.ErrReason;
 import com.ruoyi.colorfulfog.model.mongodb.BillData;
 import com.ruoyi.colorfulfog.model.vo.ExportErrReason;
 import com.ruoyi.colorfulfog.model.vo.ExportExcelVO;
 import com.ruoyi.colorfulfog.service.table.interfaces.BillMainService;
 import com.ruoyi.colorfulfog.service.table.interfaces.DependDataService;
 import com.ruoyi.colorfulfog.service.table.interfaces.DependMainService;
+import com.ruoyi.colorfulfog.service.table.interfaces.ErrReasonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
-import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.ruoyi.colorfulfog.model.ErrReason;
-import com.ruoyi.colorfulfog.mapper.ErrReasonMapper;
-import com.ruoyi.colorfulfog.service.table.interfaces.ErrReasonService;
 import org.springframework.transaction.annotation.Transactional;
 
-import static java.util.Comparator.comparing;
-import static java.util.stream.Collectors.collectingAndThen;
-import static java.util.stream.Collectors.toCollection;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ErrReasonServiceImpl extends ServiceImpl<ErrReasonMapper, ErrReason> implements ErrReasonService{
@@ -77,7 +69,9 @@ public class ErrReasonServiceImpl extends ServiceImpl<ErrReasonMapper, ErrReason
         }
         updateErrReason(haveDealErr);
         // 处理依赖表的数据
-        dependDataService.saveBatch(dependDataList);
+        if (dependDataList.size()>0){
+            dependDataService.addBatch(dependDataList);
+        }
         if (haveDealErr.size()==errReason.size()){
             return true;
         }{
@@ -119,22 +113,17 @@ public class ErrReasonServiceImpl extends ServiceImpl<ErrReasonMapper, ErrReason
     @Transactional
     @Override
     public void saveErrReasonBatch(List<ErrReason> errReason){
-        List<ErrReason> errReasons = list(new LambdaQueryWrapper<ErrReason>()
+        // 对errReason去重，根据reason.getDependCode(), reason.getKey()两个字段去重
+        Set<ErrReason> uniqueErrReasons = new LinkedHashSet<>(errReason);
+        errReason = new ArrayList<>(uniqueErrReasons);
+        List<ErrReason> errReasonOld = list(new LambdaQueryWrapper<ErrReason>()
                 .eq(ErrReason::getDealFlag,0)
                 .in(ErrReason::getDependCode, errReason.stream().map(ErrReason::getDependCode).collect(Collectors.toList()))
                 .in(ErrReason::getKey, errReason.stream().map(ErrReason::getKey).collect(Collectors.toList()))
         );
-        // 去重errReason
-        errReason = errReason.stream().collect(
-                collectingAndThen(
-                        toCollection(
-                                () -> new TreeSet<>(comparing(ErrReason::getDependCode).thenComparing(ErrReason::getKey))
-                        ),
-                        ArrayList::new
-                )
-        );
-        Map<String, ErrReason> errReasonMap = errReasons.stream().collect(Collectors.toMap(
-                arr -> String.format("%s[-]%s", arr.getDependCode(), arr.getKey()), errReason1 -> errReason1
+        Map<String, ErrReason> errReasonMap = errReasonOld.stream().collect(Collectors.toMap(
+                arr -> String.format("%s[-]%s", arr.getDependCode(), arr.getKey()), errReason1 -> errReason1,
+                (existing, replacement) -> existing
         ));
         errReason.removeIf(reason -> errReasonMap.get(String.format("%s[-]%s", reason.getDependCode(), reason.getKey())) != null);
         saveBatch(errReason);

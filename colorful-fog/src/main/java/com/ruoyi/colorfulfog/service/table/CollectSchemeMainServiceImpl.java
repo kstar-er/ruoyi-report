@@ -1,9 +1,13 @@
 package com.ruoyi.colorfulfog.service.table;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ruoyi.colorfulfog.config.exception.GlobalException;
 import com.ruoyi.colorfulfog.constant.enums.*;
-import com.ruoyi.colorfulfog.model.*;
+import com.ruoyi.colorfulfog.mapper.CollectSchemeMainMapper;
+import com.ruoyi.colorfulfog.model.CollectGroup;
+import com.ruoyi.colorfulfog.model.CollectSchemeDetail;
+import com.ruoyi.colorfulfog.model.CollectSchemeMain;
 import com.ruoyi.colorfulfog.model.dto.CollectResultDto;
 import com.ruoyi.colorfulfog.model.dto.CreateAndCollectDto;
 import com.ruoyi.colorfulfog.model.dto.DoCreateCollectBillDataDto;
@@ -22,16 +26,12 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.ruoyi.colorfulfog.mapper.CollectSchemeMainMapper;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class CollectSchemeMainServiceImpl extends ServiceImpl<CollectSchemeMainMapper, CollectSchemeMain> implements CollectSchemeMainService {
@@ -50,6 +50,8 @@ public class CollectSchemeMainServiceImpl extends ServiceImpl<CollectSchemeMainM
     @Resource
     CollectResultMainService collectResultMainService;
 
+    @Resource
+    CollectGroupService collectGroupService;
 
     @Autowired
     MongoTemplate mongoTemplate;
@@ -146,13 +148,15 @@ public class CollectSchemeMainServiceImpl extends ServiceImpl<CollectSchemeMainM
 
     // 将准备好的数据传入，进行汇总计划的收集
     private List<CollectBillData> doCreateCollectBillData(DoCreateCollectBillDataDto createCollectBillDataDto) {
+        // 让这个分组按照belong来进行分组
         Map<String, List<BaseData>> belongBillMainListMap = createCollectBillDataDto.getBillMainList().stream().collect(Collectors.groupingBy(BaseData::getBelongArchiveCode));
         Map<String, List<BaseData>> baseDataMap = createCollectBillDataDto.getBillMainList().stream().collect(Collectors.groupingBy(BaseData::getSchemeCode));
         String belongCodeField = createCollectBillDataDto.getCollectSchemeMain().getBelongCodeField();
         String belongNameField = createCollectBillDataDto.getCollectSchemeMain().getBelongNameField();
         CollectSchemeMain collectSchemeMain = createCollectBillDataDto.getCollectSchemeMain();
+        Map<String,List<CollectGroup>> collectGroupMap = collectGroupService.getMapByCollectSchemeCode(collectSchemeMain.getCollectSchemeCode());
         Map<String, Map<String, Object>> collectResultMap = calculateSumFieldByBillData(baseDataMap, createCollectBillDataDto.getCollectSchemeDetails()
-                , belongCodeField);
+                , belongCodeField,collectGroupMap);
         List<CollectBillData> collectResultMainList = new ArrayList<>();
         List<String> resultCodeList = codeService.getCode(IdTypeEnum.COLLECT_DATA_CODE, collectResultMap.keySet().size());
         int index = 0;
@@ -177,12 +181,13 @@ public class CollectSchemeMainServiceImpl extends ServiceImpl<CollectSchemeMainM
                     .data(collectResultMap.get(belongCode))
                     .auditStatus(AuditStatusEnum.WAIT_START_AUDIT)
                     .build());
-            List<? extends BaseData> billMains = belongBillMainListMap.get(belongCode);
-            for (BaseData billMain : billMains) {
-                billMain.setCostTerm(collectSchemeMain.getCostTerm());
-                billMain.setCollectResultCode(resultCodeList.get(index));
-            }
+
             if (createCollectBillDataDto.getIsSave()) {
+                List<? extends BaseData> billMains = belongBillMainListMap.get(belongCode);
+                for (BaseData billMain : billMains) {
+                    billMain.setCostTerm(collectSchemeMain.getCostTerm());
+                    billMain.setCollectResultCode(resultCodeList.get(index));
+                }
                 Update update = new Update();
                 update.set("collectResultCode", resultCodeList.get(index));
                 update.set("costTerm", collectSchemeMain.getCostTerm());
@@ -203,6 +208,7 @@ public class CollectSchemeMainServiceImpl extends ServiceImpl<CollectSchemeMainM
         if (createCollectBillDataDto.getIsSave()){
             mongoTemplate.insertAll(collectResultMainList);
         }
+        collectResultMainList = collectResultMainList.stream().sorted(Comparator.comparing(CollectBillData::getBelongArchiveCode)).collect(Collectors.toList());
         return collectResultMainList;
     }
 
@@ -210,18 +216,32 @@ public class CollectSchemeMainServiceImpl extends ServiceImpl<CollectSchemeMainM
      * 更新写入的总数据，
      * 添加了一个汇总数字的字段，用于传输空白字段的值加入到刷新中
      */
-    private Map<String, Map<String, Object>> calculateSumFieldByBillData(Map<String, List<BaseData>> schemeCodeResultMap, List<CollectSchemeDetail> collectSchemeDetails, String belongCodeField){
-        return calculateSumFieldByBillData(schemeCodeResultMap, collectSchemeDetails, belongCodeField, null);
+    private Map<String, Map<String, Object>> calculateSumFieldByBillData(Map<String, List<BaseData>> schemeCodeResultMap, List<CollectSchemeDetail> collectSchemeDetails,
+                                                                         String belongCodeField,Map<String,List<CollectGroup>> collectGroupMap){
+        return calculateSumFieldByBillData(schemeCodeResultMap, collectSchemeDetails, belongCodeField, null,collectGroupMap);
     }
 
     // 计算汇总的字段数值
-    private Map<String, Map<String, Object>> calculateSumFieldByBillData(Map<String, List<BaseData>> schemeCodeResultMap, List<CollectSchemeDetail> collectSchemeDetails, String belongCodeField,Map<String,Map<String,Object>> belongCollectData) {
+    private Map<String, Map<String, Object>> calculateSumFieldByBillData(Map<String, List<BaseData>> schemeCodeResultMap, List<CollectSchemeDetail> collectSchemeDetails, String belongCodeField,
+                                                                         Map<String,Map<String,Object>> belongCollectData,Map<String,List<CollectGroup>> collectGroupMap) {
         // 收集结果的map,第一个key是账单分类的code,第二个key是收集的字段的Code，最后的vale是汇总的值
         Map<String, Map<String, Object>> collectResultMap = new HashMap<>();
         collectSchemeDetails = collectSchemeDetails.stream().sorted(Comparator.comparing(CollectSchemeDetail::getCalculateOrder)).collect(Collectors.toList());
+        Date flagTime = new Date();
+
         for (CollectSchemeDetail collectSchemeDetail : collectSchemeDetails) {
             List<? extends BaseData> billResultDataVOList = schemeCodeResultMap.get(collectSchemeDetail.getSchemeCode());
             List<String> groupByValueList = new ArrayList<>();
+            String groupBelongCode =null;
+            CollectGroup collectGroup = null;
+            if (collectGroupMap.get(collectSchemeDetail.getSchemeCode())!= null) {
+                collectGroup = collectGroupMap.get(collectSchemeDetail.getSchemeCode()).stream().findFirst().orElse(null);
+                if (collectGroup != null){
+                    groupBelongCode = collectGroup.getGroupCode();
+                    TimeUtils.initCollectResultMap(collectResultMap,collectGroup.getTimeStart(),collectGroup.getTimeStep(),
+                            collectGroup.getTimeEnd(),collectGroup.getTimeUnit(),flagTime);
+                }
+            }
             if (collectSchemeDetail.getCollectType().equals(CollectSchemeDetail.CollectTypeEnum.CONDITION_SUM)) {
                 groupByValueList = Arrays.asList(collectSchemeDetail.getGroupByFieldValue().split(","));
             }
@@ -237,11 +257,19 @@ public class CollectSchemeMainServiceImpl extends ServiceImpl<CollectSchemeMainM
                     // 需要根据汇总的字段，以及分类的字段，计算出汇总字段的数值，并赋值给汇总字段
                     Map<String, Object> dataMap = billResultDataVO.getData();
                     String belong;
-                    // 所属的code
-                    if (belongCodeField != null) {
-                        belong = billResultDataVO.getData().get(belongCodeField).toString();
+                    // 设置汇总数据所属分组的code
+                    if (collectGroup != null) {
+                        if (collectGroup.getGroupType().equals(GroupTypeEnum.DYNAMIC_TIME)){
+                            belong =  TimeUtils.transTimeToTimeRangeWithUnit(Long.valueOf(billResultDataVO.getData().get(groupBelongCode).toString()),
+                                    collectGroup.getTimeStart(),collectGroup.getTimeStep(),collectGroup.getTimeUnit(),flagTime);
+                        }else {
+                            belong = billResultDataVO.getData().get(groupBelongCode).toString();
+                        }
                     } else {
                         belong = billResultDataVO.getBelongArchiveCode();
+                    }
+                    if (dataMap.get(collectSchemeDetail.getSchemeResultCode())== null){
+                        throw new RuntimeException("汇总字段为空");
                     }
                     String value = dataMap.get(collectSchemeDetail.getSchemeResultCode()).toString();
 
@@ -328,20 +356,20 @@ public class CollectSchemeMainServiceImpl extends ServiceImpl<CollectSchemeMainM
     }
 
     @Override
-    public void flashCollect(List<BillData> billDataList, String collectResultCode) {
+    public void flashCollect(List<BillData> billDataList, CollectBillData collectBillData) {
         List<BaseData> baseDataList = new ArrayList<>(billDataList);
         baseDataList = baseDataList.stream().filter(baseData->!baseData.getStatus().equals(BillCheckStatusEnum.HAVE_DELETED)).collect(Collectors.toList());
         Map<String, List<BaseData>> schemeCodeResultMap = baseDataList.stream().collect(Collectors.groupingBy(BaseData::getSchemeCode));
-        CollectBillData collectBillData = mongoTemplate.findOne(new Query(Criteria.where("billCode").is(collectResultCode)), CollectBillData.class);
         List<CollectSchemeDetail> collectSchemeDetails = collectSchemeDetailService.listSchemeDetailBySchemeCode(Collections.singletonList(collectBillData.getSchemeCode()), SelectTypeEnum.CALC);
+        Map<String,List<CollectGroup>> colGroupMap = collectGroupService.getMapByCollectSchemeCode(collectBillData.getSchemeCode());
         Map<String,Map<String,Object>> belongCollectData = new HashMap<>();
         belongCollectData.put(collectBillData.getBelongArchiveCode(), collectBillData.getData());
-        Map<String, Map<String, Object>> collectResultMap = calculateSumFieldByBillData(schemeCodeResultMap, collectSchemeDetails, null, belongCollectData);
+        Map<String, Map<String, Object>> collectResultMap = calculateSumFieldByBillData(schemeCodeResultMap, collectSchemeDetails, null, belongCollectData,colGroupMap);
         if (collectResultMap.keySet().size() > 1) {
             throw new GlobalException(ErrorCodeEnum.PARAMETER_ERROR, "当前汇总账单存在多个商家，无法计算汇总字段");
         }
         String key = collectResultMap.keySet().iterator().next();
-        Query query = new Query(Criteria.where("billCode").is(collectResultCode));
+        Query query = new Query(Criteria.where("billCode").is(collectBillData.getBillCode()));
         Update update = new Update()
                 .set("data", collectResultMap.get(key));
         mongoTemplate.updateFirst(query, update, CollectBillData.class);

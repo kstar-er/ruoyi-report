@@ -11,6 +11,7 @@ public enum BillCheckStatusEnum {
     NORMAL(1, "正常账单"),
 
     HAVE_DELETED(2, "无效账单"),
+    PRE_UPDATE(3, "待更新账单"),
     ;
     private final int code;
     private final String msg;

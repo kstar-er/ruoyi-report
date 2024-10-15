@@ -2,7 +2,6 @@ package com.ruoyi.colorfulfog.utils;
 
 import com.ruoyi.colorfulfog.model.dto.TransInConditionDto;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class SqlUtils {
@@ -50,7 +49,7 @@ public class SqlUtils {
 
     // 在两个时间之间，大于等于xx,小于xx
     public static String transBetweenCondition(String filedName, long startTime, long endTime){
-        return String.format(" and %s >= %d and %s< %d",filedName, startTime, filedName,endTime);
+        return String.format(" %s >= %d and %s< %d",filedName, startTime, filedName,endTime);
     }
     // 测试
     public static void main(String[] args) {

@@ -1,9 +1,9 @@
 package com.ruoyi.colorfulfog.service.table.interfaces;
 
-import com.ruoyi.colorfulfog.model.SchemeMain;
-import com.ruoyi.colorfulfog.model.SchemeUserRelation;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.ruoyi.colorfulfog.model.SchemeUserRelation;
 import com.ruoyi.colorfulfog.model.dto.BindUserDto;
+import com.ruoyi.colorfulfog.model.dto.GetUserBySchemeDto;
 import com.ruoyi.colorfulfog.model.dto.SelectUserDataDto;
 import com.ruoyi.colorfulfog.model.dto.TableNameDto;
 import com.ruoyi.colorfulfog.model.vo.BelongTableVO;
@@ -17,6 +17,7 @@ public interface SchemeUserRelationService extends IService<SchemeUserRelation> 
 
     Map<String,List<SchemeUserRelation>> getMapBySchemeCode(List<String> CodeList);
     List<SchemeUserRelation> listBySchemeCode(List<String> codeList);
+    List<SchemeUserRelation>  listBySchemeCodeAndUserCode(List<String> schemeCode,List<String> userCode);
     List<SchemeUserRelation> listBySchemeCode(String code);
     List<SchemeUserRelation> listByTableName(String code);
     List<SchemeUserRelation> listByTableDto(TableNameDto code);
@@ -25,5 +26,6 @@ public interface SchemeUserRelationService extends IService<SchemeUserRelation> 
 
     List<BelongTableVO> geBelongTable();
     List<UserAndSchemeVO> getUserAndScheme(TableNameDto tableName, Integer pageNum, Integer pageSize);
+    List<SchemeUserRelation> getUserBySchemeCode(GetUserBySchemeDto getUserBySchemeDto);
 }
 

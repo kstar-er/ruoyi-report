@@ -13,6 +13,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Objects;
+
 /**
     * 账单无法生成原因汇总
     */
@@ -91,4 +93,18 @@ public class ErrReason extends BaseClass {
      */
     @TableField(value = "bill_code")
     String billCode;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ErrReason errReason = (ErrReason) o;
+        return Objects.equals(dependCode, errReason.dependCode) &&
+            Objects.equals(key, errReason.key);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(dependCode, key);
+    }
 }

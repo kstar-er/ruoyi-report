@@ -1,34 +1,34 @@
 package com.ruoyi.colorfulfog.service.table;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ruoyi.colorfulfog.config.exception.GlobalException;
 import com.ruoyi.colorfulfog.constant.enums.*;
+import com.ruoyi.colorfulfog.mapper.SchemeDetailMapper;
+import com.ruoyi.colorfulfog.model.CollectSchemeDetail;
 import com.ruoyi.colorfulfog.model.DependRule;
+import com.ruoyi.colorfulfog.model.SchemeDetail;
 import com.ruoyi.colorfulfog.model.SchemeMain;
 import com.ruoyi.colorfulfog.model.dto.CopyFieldDto;
 import com.ruoyi.colorfulfog.model.vo.ExportTemplateVO;
 import com.ruoyi.colorfulfog.service.busniess.interfaces.CodeService;
+import com.ruoyi.colorfulfog.service.table.interfaces.CollectSchemeDetailService;
 import com.ruoyi.colorfulfog.service.table.interfaces.DependRuleService;
+import com.ruoyi.colorfulfog.service.table.interfaces.SchemeDetailService;
 import com.ruoyi.colorfulfog.service.table.interfaces.SchemeMainService;
 import com.ruoyi.colorfulfog.utils.GraphUtils;
 import com.ruoyi.colorfulfog.utils.JEPUtils;
 import com.ruoyi.common.utils.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.ruoyi.colorfulfog.model.SchemeDetail;
-import com.ruoyi.colorfulfog.mapper.SchemeDetailMapper;
-import com.ruoyi.colorfulfog.service.table.interfaces.SchemeDetailService;
-
-import javax.annotation.Resource;
 
 import static com.ruoyi.colorfulfog.constant.enums.SchemeDetailParamEnum.ORDER_DATA;
 
@@ -44,6 +44,8 @@ public class SchemeDetailServiceImpl extends ServiceImpl<SchemeDetailMapper, Sch
     @Resource
     SchemeMainService schemeMainService;
 
+    @Resource
+    CollectSchemeDetailService collectSchemeDetailService;
     @Override
     public Map<String, List<SchemeDetail>> getSchemeDetailBySchemeCode(List<String> schemeCodeList) {
         return list(new LambdaQueryWrapper<SchemeDetail>().in(SchemeDetail::getSchemeCode, schemeCodeList))
@@ -110,7 +112,7 @@ public class SchemeDetailServiceImpl extends ServiceImpl<SchemeDetailMapper, Sch
         }
 
         List<SchemeDetail> schemeDetailList1 = listSchemeDetailBySchemeCode(schemeDetailList.get(0).getSchemeCode(),SelectTypeEnum.CALC);
-        if (CollectionUtils.isNotEmpty(schemeDetailList1)){
+        if (!CollectionUtils.isEmpty(schemeDetailList1)){
             schemeDetailList.addAll(schemeDetailList1);
         }
         if (!schemeDetailList.stream().allMatch(s->s.getType().equals(ORDER_DATA))){
@@ -257,6 +259,8 @@ public class SchemeDetailServiceImpl extends ServiceImpl<SchemeDetailMapper, Sch
     @Override
     public List<ExportTemplateVO> exportTemplate(String schemeCode){
         List<SchemeDetail> schemeDetailList = listSchemeDetailBySchemeCode(schemeCode,SelectTypeEnum.TEMPLATE);
+        List<CollectSchemeDetail> collectSchemeDetailList = collectSchemeDetailService.listBySchemeCode(schemeCode);
+        List<String> requiredCode = requiredCode(collectSchemeDetailList);
         SchemeMain schemeMain = schemeMainService.getSchemeMainByCode(schemeCode);
         List<ExportTemplateVO> exportTemplateVOS = new ArrayList<>();
         exportTemplateVOS.add(ExportTemplateVO.builder().resultCode("schemeCode")
@@ -278,6 +282,9 @@ public class SchemeDetailServiceImpl extends ServiceImpl<SchemeDetailMapper, Sch
             if (schemeDetail.getCalculateOrder()!=0){
                 isRequred = true;
             }
+            if (requiredCode.contains(schemeDetail.getResultCode())){
+                isRequred = true;
+            }
             exportTemplateVOS.add(
                     ExportTemplateVO.builder()
                             .resultCode(schemeDetail.getResultCode())
@@ -289,6 +296,17 @@ public class SchemeDetailServiceImpl extends ServiceImpl<SchemeDetailMapper, Sch
         }
         return exportTemplateVOS;
 
+    }
+    private List<String> requiredCode(List<CollectSchemeDetail> collectSchemeDetailList){
+        List<String> requiredCode = new ArrayList<>();
+
+        for (CollectSchemeDetail collectSchemeDetail : collectSchemeDetailList) {
+                if(collectSchemeDetail.getGroupByField()!=null){
+                    requiredCode.add(collectSchemeDetail.getGroupByField());
+                }
+                requiredCode.add(collectSchemeDetail.getSchemeResultCode());
+        }
+        return requiredCode;
     }
     @Override
     public     List<String> getOrderTableName(List<SchemeDetail> schemeDetails){

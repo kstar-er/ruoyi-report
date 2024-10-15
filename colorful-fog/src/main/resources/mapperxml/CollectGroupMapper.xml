@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.colorfulfog.mapper.CollectGroupMapper">
+  <resultMap id="BaseResultMap" type="com.ruoyi.colorfulfog.model.CollectGroup">
+    <!--@mbg.generated-->
+    <!--@Table cwu_collect_group-->
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="collect_scheme_code" jdbcType="VARCHAR" property="collectSchemeCode" />
+    <result column="scheme_code" jdbcType="VARCHAR" property="schemeCode" />
+    <result column="scheme_name" jdbcType="VARCHAR" property="schemeName" />
+    <result column="group_code" jdbcType="VARCHAR" property="groupCode" />
+    <result column="group_name" jdbcType="VARCHAR" property="groupName" />
+    <result column="sort" jdbcType="INTEGER" property="sort" />
+    <result column="create_time" jdbcType="BIGINT" property="createTime" />
+    <result column="update_time" jdbcType="BIGINT" property="updateTime" />
+    <result column="update_user" jdbcType="INTEGER" property="updateUser" />
+    <result column="create_user" jdbcType="INTEGER" property="createUser" />
+    <result column="is_delete" jdbcType="INTEGER" property="isDelete" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, collect_scheme_code, scheme_code, scheme_name, group_code, group_name, sort, 
+    create_time, update_time, update_user, create_user, is_delete
+  </sql>
+</mapper>

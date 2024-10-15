@@ -1,5 +1,6 @@
 package com.ruoyi.colorfulfog.model.dto.repo;
 
+import com.ruoyi.colorfulfog.model.dto.CollectGroupDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -51,6 +52,19 @@ public class DataSourceDTO {
      */
     private Integer month;
 
+    /**
+     * 是否实时数据
+     */
+    private Boolean isRealTime;
+
+    CollectGroupDto collectGroup;
+
 
     List<FilterCriteria> filterCriteria;
+    /**
+     * X轴是否为时间   （true 为时间类型查询，将忽略X轴字段）
+     * X轴分类，动态时间段，固定时间段，字符串类型
+     */
+    private String xType;
+    private String type;
 }

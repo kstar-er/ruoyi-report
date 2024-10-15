@@ -53,6 +53,11 @@ public class OrderTableRelationServiceImpl extends ServiceImpl<OrderTableRelatio
         List<OrderTableRelation> orderTableRelations = list(new LambdaQueryWrapper<>(orderTableRelation)
                 .orderByDesc(OrderTableRelation::getId));
         List<OrderTableRelationVO> orderTableRelationVOS = new ArrayList<>();
+        if (orderTableRelations == null || orderTableRelations.isEmpty()) {
+            PageInfo<OrderTableRelationVO> pageInfo = new PageInfo<>(orderTableRelationVOS);
+            pageInfo.setTotal(PageInfo.of(orderTableRelations).getTotal());
+            return pageInfo;
+        }
         List<Long> idList = orderTableRelations.stream().map(OrderTableRelation::getId).collect(Collectors.toList());
 
         List<ForeignKey> foreignKeys = foreignKeyService.list(new LambdaQueryWrapper<ForeignKey>()

@@ -8,5 +8,5 @@ import java.util.List;
 import java.util.Map;
 
 public interface RepoService {
-    Map<String, List<Map<String, Double>>> getData(DataSourceDTO dataSourceDTO);
+    Map<String, Map<String, Double>> getData(DataSourceDTO dataSourceDTO);
 }

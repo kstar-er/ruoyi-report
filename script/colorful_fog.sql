@@ -13,6 +13,8 @@
 
  Date: 15/07/2024 17:57:05
 */
+create database colorful_fog default character set utf8mb4 collate utf8mb4_unicode_ci;
+use colorful_fog;
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
@@ -414,6 +416,7 @@ CREATE TABLE `cwu_scheme_main`  (
                                     `time_field` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '时间字段',
                                     `time_field_table` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '时间字段所在表',
                                     `time_field_result_code` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '时间字段对应编码',
+                                    `use_user_table`         tinyint     default 0      null comment '是否使用用户标',
                                     PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 75 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin COMMENT = '计划内容主表' ROW_FORMAT = DYNAMIC;
 
@@ -476,6 +479,25 @@ CREATE TABLE `cwu_update_bill_log`  (
                                         PRIMARY KEY (`id`) USING BTREE,
                                         INDEX `bill_code_name_index`(`bill_code`, `result_name`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '手动更新账单的日志' ROW_FORMAT = DYNAMIC;
+
+CREATE TABLE `cwu_collect_group`  (
+
+                                      collect_scheme_code  varchar(40)       null comment '汇总方案的编码',
+                                      scheme_code          varchar(40)       null comment '方案的编码',
+                                      scheme_name          varchar(40)       null comment '方案的名称',
+                                      group_code   varchar(40)       null comment '以哪个字段作为分组的字段的编码',
+                                      group_name   varchar(40)       null comment '以哪个字段作为分组的字段的名词',
+                                      sort        int                     null comment '分组顺序，多次分组的时候使用',
+                                      id             int auto_increment
+                                          primary key,
+                                      create_time    bigint        null comment '创建时间',
+                                      update_time    bigint        null comment '更新新时间',
+                                      update_user    int           null comment '更新者id',
+                                      create_user    int           null comment '创建者id',
+                                      is_delete      int default 0 null comment '1删除0有效'
+
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic comment '汇总方案分组管理';
+
 
 -- ----------------------------
 -- Table structure for sys_data_rule
@@ -668,11 +690,17 @@ CREATE TABLE `sys_key_value`  (
 -- ----------------------------
 -- Records of sys_key_value
 -- ----------------------------
-INSERT INTO `sys_key_value` VALUES (9, '1', NULL, 1714975651635, 1715153500219, 1783676987621154817, 1, 0, 'SCHEME_CODE_NUM');
-INSERT INTO `sys_key_value` VALUES (10, '2', NULL, 1714975651654, 1715153500239, 1783676987621154817, 1, 0, 'RESULT_FIELD_NUM');
-INSERT INTO `sys_key_value` VALUES (11, '1', NULL, 1714976077453, 1715180784053, 1783676987621154817, 1, 0, 'DEPEND_CODE_NUM');
-INSERT INTO `sys_key_value` VALUES (12, '4', NULL, 1714977389906, 1715181655976, 1, 1, 0, 'RESULT_BATCH_CODE_NUM');
-INSERT INTO `sys_key_value` VALUES (13, '15', NULL, 1714977389956, 1715181656002, 1, 1, 0, 'COST_BILL_NUM');
+
+INSERT INTO `sys_key_value` VALUES (1, '1', '计划表主表', 1688624377040, 1723565818128, 1, NULL, 0, 'SCHEME_CODE_NUM');
+INSERT INTO `sys_key_value` VALUES (2, '1', '依赖表主表', 1688624377040, 1723562792203, 1, NULL, 0, 'DEPEND_CODE_NUM');
+INSERT INTO `sys_key_value` VALUES (3, '1', '结果字段编码', 1688624377040, 1726128454544, 1, NULL, 0, 'RESULT_FIELD_NUM');
+INSERT INTO `sys_key_value` VALUES (4, '1', '账单编码', 1688624377040, 1728628411318, 1, NULL, 0, 'COST_BILL_NUM');
+INSERT INTO `sys_key_value` VALUES (5, '1', '汇总数据结果编码', 1709104381719, 1728617632096, 1387, NULL, 0, 'COLLECT_DATA_CODE_NUM');
+INSERT INTO `sys_key_value` VALUES (6, '1', '汇总方案编码', 1709618794047, 1721702449264, 1, NULL, 0, 'COLLECT_SCHEME_CODE_NUM');
+INSERT INTO `sys_key_value` VALUES (7, '3', '汇总结果编码', 1709620126655, 1723707401012, 1, NULL, 0, 'COLLECT_RESULT_CODE_NUM');
+INSERT INTO `sys_key_value` VALUES (8, '1', '账单批次号', 1711956401518, 1728628404042, 1, NULL, 0, 'RESULT_BATCH_CODE_NUM');
+INSERT INTO `sys_key_value` VALUES (9, 'yourKey', '关联外部项目身份校验', NULL, NULL, NULL, NULL, 0, 'ColorfulFog');
+INSERT INTO `sys_key_value` VALUES (10, NULL, '外键图表json', NULL, NULL, NULL, NULL, 0, 'chartJson');
 
 -- ----------------------------
 -- Table structure for sys_logininfor
@@ -918,6 +946,39 @@ CREATE TABLE `sys_oss`  (
   `service` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'minio' COMMENT '服务商',
   PRIMARY KEY (`oss_id`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'OSS对象存储表' ROW_FORMAT = DYNAMIC;
+DROP TABLE IF EXISTS `sys_oss_config`;
+CREATE TABLE `sys_oss_config`  (
+                                   `oss_config_id` bigint NOT NULL COMMENT '主建',
+                                   `config_key` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '配置key',
+                                   `access_key` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT 'accessKey',
+                                   `secret_key` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '秘钥',
+                                   `bucket_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '桶名称',
+                                   `prefix` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '前缀',
+                                   `endpoint` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '访问站点',
+                                   `domain` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '自定义域名',
+                                   `is_https` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT 'N' COMMENT '是否https（Y=是,N=否）',
+                                   `region` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '域',
+                                   `access_policy` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '1' COMMENT '桶权限类型(0=private 1=public 2=custom)',
+                                   `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '1' COMMENT '是否默认（0=是,1=否）',
+                                   `ext1` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '扩展字段',
+                                   `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '创建者',
+                                   `create_time` bigint NULL DEFAULT NULL COMMENT '创建时间',
+                                   `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '更新者',
+                                   `update_time` bigint NULL DEFAULT NULL COMMENT '更新时间',
+                                   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '备注',
+                                   PRIMARY KEY (`oss_config_id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '对象存储配置表' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of sys_oss_config
+-- ----------------------------
+INSERT INTO `sys_oss_config` VALUES (1, 'minio', 'ruoyi', 'ruoyi123', 'ruoyi', '', '127.0.0.1:9000', '', 'N', '', '1', '0', '', 'admin', 20240422170407, 'admin', 20240422170407, NULL);
+INSERT INTO `sys_oss_config` VALUES (2, 'qiniu', 'XXXXXXXXXXXXXXX', 'XXXXXXXXXXXXXXX', 'ruoyi', '', 's3-cn-north-1.qiniucs.com', '', 'N', '', '1', '1', '', 'admin', 20240422170407, 'admin', 20240422170407, NULL);
+INSERT INTO `sys_oss_config` VALUES (3, 'aliyun', 'XXXXXXXXXXXXXXX', 'XXXXXXXXXXXXXXX', 'ruoyi', '', 'oss-cn-beijing.aliyuncs.com', '', 'N', '', '1', '1', '', 'admin', 20240422170407, 'admin', 20240422170407, NULL);
+INSERT INTO `sys_oss_config` VALUES (4, 'qcloud', 'XXXXXXXXXXXXXXX', 'XXXXXXXXXXXXXXX', 'ruoyi-1250000000', '', 'cos.ap-beijing.myqcloud.com', '', 'N', 'ap-beijing', '1', '1', '', 'admin', 20240422170407, 'admin', 20240422170407, NULL);
+INSERT INTO `sys_oss_config` VALUES (5, 'image', 'ruoyi', 'ruoyi123', 'ruoyi', 'image', '127.0.0.1:9000', '', 'N', '', '1', '1', '', 'admin', 20240422170407, 'admin', 20240422170407, NULL);
+
+SET FOREIGN_KEY_CHECKS = 1;
 
 -- ----------------------------
 -- Records of sys_oss

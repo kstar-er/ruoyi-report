@@ -22,4 +22,5 @@ public class CollectResultMainDto {
     Long createEndTime;
     Long updateStartTime;
     Long updateEndTime;
+    String billCode;
 }

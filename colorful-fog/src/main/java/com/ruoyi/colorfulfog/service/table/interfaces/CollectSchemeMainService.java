@@ -1,9 +1,10 @@
 package com.ruoyi.colorfulfog.service.table.interfaces;
 
-import com.ruoyi.colorfulfog.model.CollectSchemeMain;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.ruoyi.colorfulfog.model.CollectSchemeMain;
 import com.ruoyi.colorfulfog.model.dto.CreateAndCollectDto;
 import com.ruoyi.colorfulfog.model.mongodb.BillData;
+import com.ruoyi.colorfulfog.model.mongodb.CollectBillData;
 import com.ruoyi.colorfulfog.model.vo.ExportExcelVO;
 
 import java.util.List;
@@ -20,5 +21,5 @@ public interface CollectSchemeMainService extends IService<CollectSchemeMain>{
 
     List<CollectSchemeMain> listBySchemeCodeList(List<String> schemeCodeList);
     List<CollectSchemeMain> listBySchemeCodeList(Set<String> schemeCodeList);
-    void flashCollect(List<BillData> billDataList,String collectResultCode);
+    void flashCollect(List<BillData> billDataList, CollectBillData collectResultCode);
 }

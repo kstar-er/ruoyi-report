@@ -11,6 +11,7 @@ import com.ruoyi.colorfulfog.model.vo.ResultVO;
 import com.ruoyi.colorfulfog.model.vo.SchemeMainDetailVO;
 import com.ruoyi.colorfulfog.model.vo.TestBillResultVO;
 import com.ruoyi.colorfulfog.service.busniess.interfaces.CodeService;
+import com.ruoyi.colorfulfog.service.table.interfaces.BillMainService;
 import com.ruoyi.colorfulfog.service.table.interfaces.SchemeMainService;
 import com.ruoyi.colorfulfog.utils.ResultVOUtils;
 import com.github.pagehelper.PageHelper;
@@ -34,6 +35,8 @@ import java.util.stream.Collectors;
 public class SchemeMainController {
     @Resource
     SchemeMainService schemeMainService;
+    @Resource
+    BillMainService billMainService;
 
     /**
      * 测试创建账单记录
@@ -146,6 +149,18 @@ public class SchemeMainController {
         return  ResultVOUtils.success();
     }
 
+    /**
+     * 批量传入用户编码，对这批用户的档案方案的数据进行重新读取和生成，删除原本的数据
+     */
+    @PostMapping("reCreateByUserCode")
+    public ResultVO<String> reCreateByUserCode(@RequestBody ReCreateByUserCode reCreateByUserCode){
+        schemeMainService.reCreateByUserCode(reCreateByUserCode);
+        return  ResultVOUtils.success();
+    }
+    @PostMapping("getBatchCode")
+    public ResultVO<List<String>> getBatchCode(@RequestBody ReCreateByUserCode reCreateByUserCode){
+        return  ResultVOUtils.success(billMainService.getBatchCode(reCreateByUserCode));
+    }
 
 
 }

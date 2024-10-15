@@ -66,5 +66,7 @@ public class BaseData {
      */
     @Field("lastDetail")
     private Map<String, List<UpdateRecord>> lastData;
+    @Field("preData")
+    private Map<String, List<PreUpdateRecord>> preData;
 
 }

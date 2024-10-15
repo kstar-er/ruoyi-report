@@ -1,11 +1,12 @@
 package com.ruoyi.colorfulfog.model.dto;
 
+import lombok.Data;
 import lombok.Getter;
 
 import java.util.List;
 import java.util.Map;
 
-@Getter
+@Data
 public class BillResultDto {
     /**
      * 传resultCode和value一对参数做为查询的依据
@@ -31,5 +32,5 @@ public class BillResultDto {
     Long createEndTime;
     Long updateStartTime;
     Long updateEndTime;
-
+    Boolean havePreData;
 }

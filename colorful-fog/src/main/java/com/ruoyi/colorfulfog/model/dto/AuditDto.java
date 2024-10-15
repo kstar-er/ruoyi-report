@@ -20,6 +20,10 @@ public class AuditDto {
     // 需要审核的是哪个ID
     String id;
     Long autoAuditTime;
+    // 需要审核的是哪个单据
+    String billCode;
+    // 审核的是哪个字段
+    String fieldCode;
 
 
 

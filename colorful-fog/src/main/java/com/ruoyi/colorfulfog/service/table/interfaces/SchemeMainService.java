@@ -1,18 +1,15 @@
 package com.ruoyi.colorfulfog.service.table.interfaces;
 
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.github.pagehelper.PageInfo;
 import com.ruoyi.colorfulfog.constant.enums.CollectDataTypeEnum;
 import com.ruoyi.colorfulfog.constant.enums.ExecutionTimeUnit;
 import com.ruoyi.colorfulfog.model.*;
-import com.baomidou.mybatisplus.extension.service.IService;
-import com.ruoyi.colorfulfog.model.dto.BillResultFlashDto;
-import com.ruoyi.colorfulfog.model.dto.CreateAndCollectDto;
-import com.ruoyi.colorfulfog.model.dto.SchemeMainDto;
-import com.ruoyi.colorfulfog.model.dto.TimeDto;
+import com.ruoyi.colorfulfog.model.dto.*;
 import com.ruoyi.colorfulfog.model.mongodb.BillData;
 import com.ruoyi.colorfulfog.model.vo.SchemeMainDetailVO;
 import com.ruoyi.colorfulfog.model.vo.TestBillResultOriginVO;
 import com.ruoyi.colorfulfog.model.vo.TestBillResultVO;
-import com.github.pagehelper.PageInfo;
 
 import java.util.List;
 import java.util.Map;
@@ -25,10 +22,12 @@ public interface SchemeMainService extends IService<SchemeMain> {
      * 0是正常运行，生成数据并保存
      * 1是测试，数据，直接返回2行数据,不保存数据库
      * 2是导出实时数据，生成全部数据，不保存数据库。
+     *
      * @param schemeMainList
      * @param testFlag
+     * @param userCodeList
      */
-    TestBillResultOriginVO startCreateBill(List<String> schemeMainList, Integer testFlag, TimeDto timeDto);
+    TestBillResultOriginVO startCreateBill(List<String> schemeMainList, Integer testFlag, TimeDto timeDto,List<String> userCodeList);
     TestBillResultOriginVO startCreateBill(List<String> schemeMainList, Integer testFlag);
     List<SchemeUserRelation> checkUserData(List<SchemeUserRelation> schemeUserRelationList, TimeDto timeDto,
                                            String schemeCode, CollectDataTypeEnum collectDataTypeEnum,Integer testFlag);
@@ -59,6 +58,15 @@ public interface SchemeMainService extends IService<SchemeMain> {
 
     List<BillData> createAndCollect(CreateAndCollectDto billResultDto);
     void deleteSchemeMain(List<Integer> idList);
+
+    /**
+     * 对方案中存在的商家进行单独的账单数据重新生成，
+     * 删除掉原有的账单数据，生成新的账单数据
+     * 仅删除最新的批次号的账单，不能全删了。
+     * @param reCreateByUserCode
+     */
+    void reCreateByUserCode(ReCreateByUserCode reCreateByUserCode);
+
 }
 
 

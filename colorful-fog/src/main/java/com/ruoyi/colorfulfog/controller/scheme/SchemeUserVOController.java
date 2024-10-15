@@ -145,4 +145,8 @@ public class SchemeUserVOController {
                                                             @RequestParam(defaultValue = "20") Integer pageSize){
         return ResultVOUtils.success(mainService.getUserAndScheme(tableName,pageNum,pageSize));
     }
+    @PostMapping("getUserBySchemeCode")
+    public ResultVO<List<SchemeUserRelation>> getUserBySchemeCode(@RequestBody GetUserBySchemeDto getUserBySchemeDto){
+        return ResultVOUtils.success(mainService.getUserBySchemeCode(getUserBySchemeDto));
+    }
 }

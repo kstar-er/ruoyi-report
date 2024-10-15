@@ -1,6 +1,7 @@
 package com.ruoyi.colorfulfog.controller.bill;
 
 
+import com.ruoyi.colorfulfog.constant.enums.SelectTypeEnum;
 import com.ruoyi.colorfulfog.model.dto.AddDataManualDto;
 import com.ruoyi.colorfulfog.model.dto.BillResultDto;
 
@@ -37,7 +38,7 @@ public class BillResultController {
     public ResultVO<BillResultVO> list(@RequestBody BillResultDto billResultDto, @RequestParam Integer currentPage,
                                        @RequestParam Integer pageSize) {
         return ResultVOUtils.success(billMainService
-                .list(billResultDto, currentPage, pageSize)) ;
+                .list(billResultDto, currentPage, pageSize, SelectTypeEnum.CALC)) ;
 
     }
 

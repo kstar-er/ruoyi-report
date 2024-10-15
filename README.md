@@ -160,3 +160,15 @@ ps 后缀必须加 --legcy-peer-deps 因为有些插件目前npm已经不再支�
 
 [#shuoming]: 
 [#操作说明]: 
+
+
+
+## License
+
+[MIT](http://opensource.org/licenses/MIT)
+
+## 联系我吧
+
+添加微信时请备注：report或报表说明来意，十分感谢
+
+<img src="README.assets/image-20241015171703327.png" alt="image-20241015171703327" style="zoom:50%;" />

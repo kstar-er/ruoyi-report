@@ -9,7 +9,7 @@ ruoyi:
   # 缓存懒加载
   cacheLazy: false
 ip:
-  location: 127.0.0.1 # 全局的ip控制，所有的服务跟随这个变换更换这个为本地的即可
+  location: 127.0.0.1 # 全局的ip控制，控制：数据库ip，redis缓存ip
 captcha:
   # 页面 <参数设置> 可开启关闭 验证码校验
   # 验证码类型 math 数组计算 char 字符验证
@@ -69,7 +69,7 @@ spring:
     # 国际化资源文件路径
     basename: i18n/messages
   profiles:
-    active: @profiles.active@
+    active: prod
   # 文件上传
   servlet:
     multipart:
